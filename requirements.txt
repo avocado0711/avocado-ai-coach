@@ -1,0 +1,10 @@
+fastapi>=0.110
+uvicorn[standard]>=0.27
+pydantic>=2.5
+python-dotenv>=1.0
+python-jose[cryptography]>=3.3
+openai>=1.10
+sentence-transformers>=2.5
+chromadb>=0.4.22
+FlagEmbedding>=1.2.5
+numpy>=1.24

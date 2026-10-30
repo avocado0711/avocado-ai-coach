@@ -1,0 +1,8 @@
+.env
+AItools/
+chroma_db/
+*.db
+*.db-shm
+*.db-wal
+*.log
+__pycache__/

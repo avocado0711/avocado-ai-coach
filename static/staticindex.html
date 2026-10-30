@@ -1,0 +1,1083 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>牛油果AI训练助手 · 懂训练，更懂你</title>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; font-family:"Microsoft Yahei","PingFang SC",sans-serif; }
+:root {
+    --green-1:#a8e063; --green-2:#56ab2f; --green-3:#2f6b1c;
+    --line:rgba(168,224,99,0.15);
+    --radius:20px;
+    --ease:cubic-bezier(.22,.61,.36,1);
+}
+html,body { height:100%; }
+body { background:#0e140e; color:#e8f5e0; overflow-x:hidden; position:relative; }
+
+body::before, body::after {
+    content:""; position:fixed; border-radius:50%; filter:blur(90px);
+    z-index:-2; pointer-events:none; opacity:.55;
+    animation: floatGlow 18s ease-in-out infinite alternate;
+}
+body::before { width:600px; height:600px; top:-200px; left:-150px;
+    background: radial-gradient(circle, rgba(168,224,99,0.5), transparent 70%); }
+body::after { width:700px; height:700px; bottom:-250px; right:-200px;
+    background: radial-gradient(circle, rgba(86,171,47,0.35), transparent 70%);
+    animation-delay:-6s; }
+@keyframes floatGlow { 0% { transform: translate(0,0) scale(1); } 100% { transform: translate(40px,60px) scale(1.15); } }
+
+@keyframes fadeUp { from { opacity:0; transform: translateY(20px); } to { opacity:1; transform: translateY(0); } }
+@keyframes fadeIn { from { opacity:0; } to { opacity:1; } }
+@keyframes popIn { 0% { opacity:0; transform: scale(.9); } 100% { opacity:1; transform: scale(1); } }
+@keyframes slideInLeft { from { opacity:0; transform: translateX(-30px); } to { opacity:1; transform: translateX(0); } }
+@keyframes slideInRight { from { opacity:0; transform: translateX(30px); } to { opacity:1; transform: translateX(0); } }
+@keyframes pulse { 0%,100% { box-shadow: 0 0 0 0 rgba(168,224,99,0.4); } 50% { box-shadow: 0 0 0 12px rgba(168,224,99,0); } }
+@keyframes blink { 0%,50% { opacity:1; } 51%,100% { opacity:0; } }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ==================== 苹果风进场动画 ==================== */
+.apple-intro { position: fixed; inset: 0; z-index: 9999; background: #0e140e; display: flex; align-items: center; justify-content: center; transition: opacity 0.8s cubic-bezier(0.4, 0, 0.2, 1), transform 0.8s cubic-bezier(0.4, 0, 0.2, 1); pointer-events: none; }
+.apple-intro.fade-out { opacity: 0; transform: scale(1.05); pointer-events: none; }
+.intro-content { display: flex; flex-direction: column; align-items: center; animation: introPopIn 1.2s cubic-bezier(0.2, 0.8, 0.2, 1) forwards; }
+.intro-logo { font-size: 80px; margin-bottom: 16px; filter: drop-shadow(0 0 20px rgba(168,224,99,0.4)); }
+.intro-title { font-size: 26px; font-weight: 800; letter-spacing: 2px; color: #e8f5e0; margin-bottom: 8px; }
+.intro-slogan { font-size: 14px; color: #8fa485; letter-spacing: 5px; margin-bottom: 30px; animation: fadeIn 2s ease-in-out; }
+.intro-loader { width: 120px; height: 3px; background: rgba(255,255,255,0.1); border-radius: 3px; overflow: hidden; }
+.intro-loader-bar { width: 0%; height: 100%; background: var(--green-1); box-shadow: 0 0 10px var(--green-1); animation: introLoad 1.5s cubic-bezier(0.2, 0.8, 0.2, 1) forwards; }
+@keyframes introPopIn { 0% { opacity: 0; transform: translateY(20px) scale(0.95); } 100% { opacity: 1; transform: translateY(0) scale(1); } }
+@keyframes introLoad { 0% { width: 0%; } 100% { width: 100%; } }
+
+/* ==================== 3D 滚轮选择器 ==================== */
+.picker-wrapper { position: relative; width: 100%; height: 180px; overflow: hidden; background: rgba(0,0,0,0.25); border: 1px solid rgba(255,255,255,0.05); border-radius: 16px; box-shadow: inset 0 4px 10px rgba(0,0,0,0.3); cursor: grab; }
+.picker-wrapper:active { cursor: grabbing; }
+.picker-scroll { height: 100%; overflow-y: scroll; scroll-snap-type: y mandatory; scrollbar-width: none; -ms-overflow-style: none; }
+.picker-scroll::-webkit-scrollbar { display: none; }
+.picker-item { height: 40px; line-height: 40px; text-align: center; font-size: 18px; color: rgba(255,255,255,0.3); scroll-snap-align: center; transition: all 0.3s var(--ease); font-weight: 600; user-select: none; }
+.picker-item.active { color: var(--green-1); font-size: 24px; text-shadow: 0 0 15px rgba(168,224,99,0.4); font-weight: 800; }
+.picker-highlight { position: absolute; top: 50%; left: 10%; right: 10%; height: 40px; transform: translateY(-50%); border-top: 1px solid rgba(168,224,99,0.3); border-bottom: 1px solid rgba(168,224,99,0.3); background: linear-gradient(90deg, transparent, rgba(168,224,99,0.05), transparent); pointer-events: none; z-index: 2; }
+.picker-mask { position: absolute; left: 0; right: 0; height: 70px; pointer-events: none; z-index: 3; }
+.picker-mask-top { top: 0; background: linear-gradient(180deg, rgba(20,28,18,1) 0%, rgba(20,28,18,0) 100%); }
+.picker-mask-bottom { bottom: 0; background: linear-gradient(0deg, rgba(20,28,18,1) 0%, rgba(20,28,18,0) 100%); }
+.ob-gender-btn { flex: 1; padding: 12px; border-radius: 12px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); color: #8fa485; font-size: 15px; font-weight: 600; cursor: pointer; transition: all 0.3s; }
+.ob-gender-btn.active { background: rgba(168,224,99,0.1); border-color: rgba(168,224,99,0.5); color: var(--green-1); box-shadow: 0 4px 15px rgba(86,171,47,0.15); }
+/* ==================== 基础页面 ==================== */
+.page { position:fixed; inset:0; display:none; overflow-y:auto; animation: fadeIn .5s var(--ease); }
+.page.active { display:block; }
+
+/* 落地页 */
+.landing { min-height:100vh; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:40px 24px; text-align:center; position:relative; }
+.landing .logo-mark { width:92px; height:92px; border-radius:26px; background: linear-gradient(135deg, var(--green-1), var(--green-2)); display:flex; align-items:center; justify-content:center; font-size:48px; box-shadow: 0 10px 40px rgba(86,171,47,0.25); animation: popIn .8s var(--ease) .1s backwards; margin-bottom:28px; }
+.landing h1 { font-size: clamp(36px, 6vw, 64px); font-weight:800; letter-spacing:-1px; background: linear-gradient(135deg, #e8ffe0, var(--green-1) 60%, var(--green-2)); -webkit-background-clip:text; background-clip:text; color:transparent; animation: fadeUp .7s var(--ease) .2s backwards; line-height:1.1; }
+.landing .sub { color:#a0b596; max-width:640px; margin:20px auto 0; font-size:17px; line-height:1.7; animation: fadeUp .7s var(--ease) .35s backwards; }
+.landing .features { display:grid; grid-template-columns:repeat(auto-fit, minmax(220px,1fr)); gap:18px; max-width:900px; margin:48px auto 0; width:100%; }
+.feature { background: linear-gradient(180deg, rgba(27,37,25,0.9), rgba(21,29,20,0.7)); border:1px solid var(--line); border-radius: var(--radius); padding:24px; text-align:left; backdrop-filter: blur(20px); transition: transform .35s var(--ease), border-color .3s; animation: fadeUp .7s var(--ease) backwards; }
+.feature:nth-child(1){ animation-delay:.5s; } .feature:nth-child(2){ animation-delay:.6s; } .feature:nth-child(3){ animation-delay:.7s; }
+.feature:hover { transform: translateY(-6px); border-color: rgba(168,224,99,0.4); }
+.feature .ico { width:44px; height:44px; border-radius:14px; background: linear-gradient(135deg, rgba(168,224,99,0.25), rgba(86,171,47,0.1)); display:flex; align-items:center; justify-content:center; font-size:22px; margin-bottom:14px; border:1px solid var(--line); }
+.feature h3 { font-size:16px; color:#dff5d0; margin-bottom:6px; }
+.feature p { font-size:13px; color:#8fa485; line-height:1.6; }
+.landing .cta-row { margin-top:48px; display:flex; gap:14px; flex-wrap:wrap; justify-content:center; animation: fadeUp .7s var(--ease) .9s backwards; }
+.btn-primary { padding:14px 34px; border-radius:40px; border:none; background: linear-gradient(135deg, var(--green-1), var(--green-2)); color:#0e140e; font-weight:800; font-size:15px; cursor:pointer; box-shadow: 0 8px 30px rgba(86,171,47,0.35); transition: transform .25s var(--ease), box-shadow .3s; position:relative; overflow:hidden; }
+.btn-primary:hover { transform: translateY(-2px) scale(1.02); box-shadow: 0 12px 40px rgba(86,171,47,0.5); }
+.btn-primary:active { transform: scale(.98); }
+.btn-ghost { padding:14px 30px; border-radius:40px; background: transparent; color:#c8e0b8; font-weight:700; font-size:15px; border:1px solid rgba(168,224,99,0.3); cursor:pointer; transition: all .3s; }
+.btn-ghost:hover { background: rgba(168,224,99,0.08); border-color: rgba(168,224,99,0.6); transform: translateY(-2px); }
+.landing .scroll-hint { position:absolute; bottom:24px; left:50%; transform:translateX(-50%); color:#5c6e56; font-size:12px; animation: pulse 2.4s infinite; }
+
+/* 登录页 */
+.auth-page { min-height:100vh; display:flex; align-items:center; justify-content:center; padding:24px; }
+.auth-card { width:100%; max-width:420px; background: linear-gradient(180deg, rgba(27,37,25,0.92), rgba(21,29,20,0.85)); border:1px solid var(--line); backdrop-filter: blur(24px); border-radius: 28px; padding:40px 36px; box-shadow: 0 30px 80px rgba(0,0,0,0.5); animation: popIn .6s var(--ease); position:relative; }
+.auth-card .back { position:absolute; top:20px; left:20px; background:transparent; border:none; color:#8fa485; font-size:20px; cursor:pointer; padding:6px; transition: color .2s, transform .2s; }
+.auth-card .back:hover { color:var(--green-1); transform: translateX(-3px); }
+.auth-card .brand { display:flex; align-items:center; justify-content:center; margin-bottom:8px; }
+.auth-card .brand .ico { width:44px; height:44px; border-radius:14px; background: linear-gradient(135deg, var(--green-1), var(--green-2)); display:flex; align-items:center; justify-content:center; font-size:22px; }
+.auth-card h2 { text-align:center; font-size:24px; color:#e8f5e0; margin-bottom:6px; font-weight:800; }
+.auth-card .hint { text-align:center; color:#7e9274; font-size:13px; margin-bottom:28px; }
+.auth-tabs { display:flex; gap:4px; padding:4px; background: rgba(0,0,0,0.3); border-radius:14px; margin-bottom:24px; }
+.auth-tabs button { flex:1; padding:10px; border-radius:10px; border:none; background:transparent; color:#8fa485; cursor:pointer; font-weight:700; font-size:14px; transition: all .3s var(--ease); }
+.auth-tabs button.active { background: linear-gradient(135deg, var(--green-1), var(--green-2)); color:#0e140e; box-shadow: 0 4px 14px rgba(86,171,47,0.4); }
+.form-group { margin-bottom:16px; }
+.form-group label { display:block; font-size:12px; color:#8fa485; margin-bottom:6px; letter-spacing:.5px; }
+.form-group input { width:100%; padding:14px 16px; border-radius:14px; background: rgba(0,0,0,0.3); border:1px solid var(--line); color:#e8f5e0; font-size:15px; outline:none; transition: border-color .3s, background .3s; }
+.form-group input:focus { border-color: rgba(168,224,99,0.6); background: rgba(0,0,0,0.4); box-shadow: 0 0 0 4px rgba(168,224,99,0.08); }
+.form-err { color:#ff8a8a; font-size:13px; min-height:20px; margin-bottom:12px; text-align:center; }
+.auth-submit { width:100%; padding:14px; border-radius:14px; border:none; background: linear-gradient(135deg, var(--green-1), var(--green-2)); color:#0e140e; font-weight:800; font-size:15px; cursor:pointer; transition: transform .25s var(--ease), box-shadow .3s; box-shadow: 0 8px 26px rgba(86,171,47,0.4); }
+.auth-submit:hover { transform: translateY(-2px); }
+.auth-submit:active { transform: scale(.98); }
+.auth-submit:disabled { opacity:.6; cursor:not-allowed; }
+/* ==================== 主聊天页 ==================== */
+.app-page { min-height:100vh; }
+.app-header { position:sticky; top:0; z-index:10; display:flex; align-items:center; justify-content:space-between; padding:16px 28px; background: rgba(14,20,14,0.65); backdrop-filter: blur(28px); border-bottom: 1px solid rgba(255,255,255,0.05); box-shadow: 0 4px 30px rgba(0,0,0,0.1); }
+.app-brand { display:flex; align-items:center; gap:12px; }
+.app-brand .logo { width:38px; height:38px; border-radius:11px; background: linear-gradient(135deg, var(--green-1), var(--green-2)); display:flex; align-items:center; justify-content:center; font-size:20px; box-shadow: 0 4px 14px rgba(86,171,47,0.4); }
+.app-brand h2 { font-size:16px; color:#e8f5e0; font-weight:800; letter-spacing:0.5px; }
+.app-brand p { font-size:11px; color:#7e9274; }
+.app-user { display:flex; gap:10px; align-items:center; }
+.app-user .avatar { width:34px; height:34px; border-radius:50%; background: linear-gradient(135deg, var(--green-2), var(--green-3)); display:flex; align-items:center; justify-content:center; font-size:14px; font-weight:800; color:#fff; box-shadow: 0 0 10px rgba(168,224,99,0.2); }
+.app-user .name { font-size:13px; color:#c8e0b8; font-weight:600; }
+.btn-logout { padding:7px 16px; border-radius:20px; background: transparent; color:#8fa485; border:1px solid var(--line); cursor:pointer; font-size:12px; font-weight:700; transition: all .25s; }
+.btn-logout:hover { color:#ff8a8a; border-color: rgba(255,138,138,0.4); background: rgba(255,138,138,0.05); }
+.app-main { max-width:1000px; margin:0 auto; padding:24px; display:grid; gap:20px; }
+@media (min-width:900px) { .app-main { grid-template-columns: 320px 1fr; } }
+
+/* 身体档案面板美化 */
+.profile-panel { background: linear-gradient(180deg, rgba(27,37,25,0.85), rgba(21,29,20,0.7)); border:1px solid rgba(255,255,255,0.06); border-radius: var(--radius); padding:24px; backdrop-filter: blur(20px); height: fit-content; position:sticky; top: 90px; box-shadow: inset 0 1px 0 rgba(255,255,255,0.1), 0 15px 35px rgba(0,0,0,0.4); }
+.profile-panel h3 { font-size:14px; color:#dff5d0; margin-bottom:18px; display:flex; align-items:center; justify-content:space-between; font-weight:800; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 14px; }
+.profile-panel .tip { font-size:12px; color:var(--green-1); font-weight:normal; opacity:0; transition: opacity .3s; background: rgba(168,224,99,0.1); padding: 4px 10px; border-radius: 10px; }
+.profile-panel .tip.show { opacity:1; }
+.profile-row { display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:16px; }
+.profile-item label { display:block; font-size:12px; color:#8fa485; margin-bottom:8px; letter-spacing:0.5px; font-weight:600; }
+.profile-item input, .profile-item select { width:100%; padding:12px 16px; border-radius:12px; background: rgba(0,0,0,0.25); border:1px solid rgba(255,255,255,0.04); color:#e8f5e0; font-size:14px; outline:none; transition: all 0.3s var(--ease); box-shadow: inset 0 2px 5px rgba(0,0,0,0.3); }
+.profile-item input:focus, .profile-item select:focus { border-color: rgba(168,224,99,0.4); background: rgba(0,0,0,0.4); box-shadow: inset 0 2px 5px rgba(0,0,0,0.3), 0 0 0 3px rgba(168,224,99,0.15); }
+.profile-item select { appearance: none; -webkit-appearance: none; background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23a8e063' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e"); background-repeat: no-repeat; background-position: right 14px center; background-size: 14px; padding-right: 36px; cursor: pointer; }
+input:-webkit-autofill, input:-webkit-autofill:hover, input:-webkit-autofill:focus, input:-webkit-autofill:active { -webkit-box-shadow: 0 0 0 30px #111811 inset !important; -webkit-text-fill-color: #e8f5e0 !important; transition: background-color 5000s ease-in-out 0s; }
+
+/* 聊天面板 */
+.chat-panel { display:flex; flex-direction:column; background: linear-gradient(180deg, rgba(27,37,25,0.6), rgba(21,29,20,0.4)); border:1px solid rgba(255,255,255,0.06); border-radius: var(--radius); overflow:hidden; min-height: 620px; box-shadow: 0 20px 50px rgba(0,0,0,0.3); }
+.chat-toolbar { display:flex; align-items:center; justify-content:space-between; padding:14px 22px; border-bottom:1px solid rgba(255,255,255,0.05); background: rgba(0,0,0,0.15); }
+.chat-toolbar .title { font-size:13px; color:#c8e0b8; font-weight:700; display:flex; align-items:center; gap:8px; letter-spacing:0.5px; }
+.chat-toolbar .dot { width:8px; height:8px; border-radius:50%; background: var(--green-1); box-shadow: 0 0 10px var(--green-1); animation: pulse 2s infinite; }
+.btn-clear { padding:6px 14px; border-radius:20px; background:transparent; color:#8fa485; border:1px solid rgba(255,255,255,0.08); cursor:pointer; font-size:12px; transition: all .25s; }
+.btn-clear:hover { color:#ff8a8a; border-color: rgba(255,138,138,0.3); background: rgba(255,138,138,0.05); }
+
+/* 深度美化滚动条 */
+.chat-box { flex:1; overflow-y:auto; padding:24px 22px; display:flex; flex-direction:column; gap:20px; scroll-behavior: smooth; }
+.chat-box::-webkit-scrollbar { width:6px; }
+.chat-box::-webkit-scrollbar-track { background: transparent; }
+.chat-box::-webkit-scrollbar-thumb { background: rgba(168,224,99,0.15); border-radius:10px; transition: background 0.3s; }
+.chat-box:hover::-webkit-scrollbar-thumb { background: rgba(168,224,99,0.4); }
+.chat-box::-webkit-scrollbar-thumb:hover { background: var(--green-1); }
+
+/* 聊天气泡质感 */
+.msg { display:flex; gap:14px; animation: fadeUp .4s var(--ease); }
+.msg.user { flex-direction:row-reverse; animation: slideInRight .4s var(--ease); }
+.msg.ai { animation: slideInLeft .4s var(--ease); }
+.msg .avatar { width:38px; height:38px; border-radius:12px; flex-shrink:0; display:flex; align-items:center; justify-content:center; font-size:16px; font-weight:800; box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
+.msg.user .avatar { background: linear-gradient(135deg, var(--green-1), var(--green-2)); color:#0e140e; }
+.msg.ai .avatar { background: rgba(168,224,99,0.1); border:1px solid rgba(168,224,99,0.2); color:var(--green-1); backdrop-filter: blur(10px); }
+.msg .body { max-width:76%; display:flex; flex-direction:column; gap:6px; }
+.msg .bubble { padding:14px 18px; border-radius:18px; line-height:1.7; font-size:14.5px; white-space:pre-wrap; word-break:break-word; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+.msg.user .bubble { background: linear-gradient(135deg, var(--green-1), var(--green-2)); color:#0e140e; border-top-right-radius:4px; box-shadow: 0 4px 15px rgba(86,171,47,0.25); }
+.msg.ai .bubble { background: rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.06); color:#e0f0d8; border-top-left-radius:4px; backdrop-filter: blur(10px); }
+.msg .meta { font-size:11px; color:#5c6e56; display:flex; gap:8px; padding: 0 4px; margin-top: 2px; }
+.msg.user .meta { flex-direction:row-reverse; }
+
+.typing-cursor { display:inline-block; width:2px; height:1em; background: var(--green-1); margin-left:2px; vertical-align: text-bottom; animation: blink 1s infinite; box-shadow: 0 0 5px var(--green-1); }
+
+/* 点赞点踩区域 */
+.feedback-bar { display:flex; align-items:center; gap:8px; margin-top:10px; font-size:12px; color:#7e9274; flex-wrap:wrap; }
+.feedback-bar .label { opacity:.8; font-weight:600; }
+.feedback-bar button { background: rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.06); border-radius:20px; padding:6px 14px; color:#a8c99a; font-size:12px; cursor:pointer; display:flex; align-items:center; gap:5px; transition: all .25s var(--ease); }
+.feedback-bar button:hover:not(:disabled) { background: rgba(168,224,99,0.1); border-color: rgba(168,224,99,0.4); transform: translateY(-1px); box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
+.feedback-bar button.active { background: linear-gradient(135deg, var(--green-1), var(--green-2)); color:#0e140e; border-color:transparent; cursor:default; font-weight:700; box-shadow: 0 4px 10px rgba(86,171,47,0.3); }
+.feedback-bar button:disabled { opacity:.45; cursor:not-allowed; }
+.feedback-thanks { font-size:11px; color:var(--green-1); animation: fadeIn .3s; margin-left: 4px; }
+
+/* 底部输入区（高级感核心） */
+.chat-input-area { display:flex; gap:12px; padding:18px 22px; border-top:1px solid rgba(255,255,255,0.05); background: rgba(0,0,0,0.2); align-items: center; }
+.chat-input-area input { flex:1; padding:14px 20px; border-radius:30px; background: rgba(0,0,0,0.3); border:1px solid rgba(255,255,255,0.05); color:#e8f5e0; font-size:14px; outline:none; transition: all .3s var(--ease); box-shadow: inset 0 2px 4px rgba(0,0,0,0.2); }
+.chat-input-area input:focus { border-color: rgba(168,224,99,0.4); background: rgba(0,0,0,0.5); box-shadow: inset 0 2px 4px rgba(0,0,0,0.2), 0 0 0 4px rgba(168,224,99,0.1); }
+.btn-send { padding: 0 26px; height: 46px; border-radius:30px; border:none; background: linear-gradient(135deg, var(--green-1), var(--green-2)); color:#0e140e; font-weight:800; font-size:14px; cursor:pointer; transition: all .3s var(--ease); box-shadow: 0 6px 20px rgba(86,171,47,0.3); position: relative; overflow: hidden; }
+.btn-send::after { content: ""; position: absolute; top: 0; left: -100%; width: 50%; height: 100%; background: linear-gradient(to right, transparent, rgba(255,255,255,0.3), transparent); transform: skewX(-20deg); transition: all 0.5s; }
+.btn-send:hover:not(:disabled)::after { left: 150%; }
+.btn-send:hover:not(:disabled) { transform: translateY(-2px) scale(1.02); box-shadow: 0 8px 25px rgba(86,171,47,0.5); }
+.btn-send:disabled { opacity:.5; cursor:not-allowed; transform:none; box-shadow: none; }
+
+.welcome-empty { display:flex; flex-direction:column; align-items:center; justify-content:center; height:100%; gap:20px; text-align:center; padding:40px 20px; animation: fadeIn .6s; }
+.welcome-empty .icon { width:76px; height:76px; border-radius:24px; background: linear-gradient(135deg, rgba(168,224,99,0.2), rgba(86,171,47,0.1)); border:1px solid var(--line); display:flex; align-items:center; justify-content:center; font-size:38px; animation: pulse 3s infinite; }
+.welcome-empty h3 { color:#dff5d0; font-size:20px; font-weight:800; }
+.welcome-empty p { color:#7e9274; font-size:14px; max-width:360px; line-height:1.7; }
+.welcome-empty .chips { display:flex; flex-wrap:wrap; gap:8px; justify-content:center; margin-top:8px; }
+.welcome-empty .chip { padding:8px 16px; border-radius:20px; background: rgba(168,224,99,0.08); border:1px solid var(--line); color:#a8c99a; font-size:13px; cursor:pointer; transition: all .25s; }
+.welcome-empty .chip:hover { background: rgba(168,224,99,0.18); border-color: rgba(168,224,99,0.5); transform: translateY(-2px); }
+
+/* ==================== 新手引导 Onboarding ==================== */
+.onboarding-overlay { position: fixed; inset: 0; z-index: 1000; background: rgba(10, 15, 10, 0.85); backdrop-filter: blur(16px); display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: opacity 0.4s ease; overflow-y: auto; padding: 20px 0; }
+.onboarding-overlay.show { opacity: 1; pointer-events: auto; }
+.onboarding-card { width: 100%; max-width: 520px; background: linear-gradient(180deg, rgba(30, 40, 28, 0.95), rgba(20, 28, 18, 0.95)); border: 1px solid rgba(168,224,99,0.15); border-radius: 24px; padding: 40px; box-shadow: 0 20px 60px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.1); transform: translateY(20px) scale(0.98); transition: all 0.4s cubic-bezier(.22,.61,.36,1); position: relative; overflow: hidden; margin: auto; }
+.onboarding-overlay.show .onboarding-card { transform: translateY(0) scale(1); }
+.step-dots { display: flex; gap: 8px; justify-content: center; margin-bottom: 30px; }
+.step-dots .dot { width: 8px; height: 8px; border-radius: 50%; background: rgba(255,255,255,0.1); transition: all 0.3s; }
+.step-dots .dot.active { background: var(--green-1); width: 24px; border-radius: 4px; box-shadow: 0 0 10px rgba(168,224,99,0.5); }
+.onboarding-step { display: none; animation: fadeIn 0.4s; }
+.onboarding-step.active { display: block; }
+.step-icon { font-size: 40px; margin-bottom: 16px; text-align: center; text-shadow: 0 4px 15px rgba(0,0,0,0.5); }
+.onboarding-step h2 { font-size: 22px; color: #dff5d0; margin-bottom: 8px; text-align: center; font-weight: 800; }
+.onboarding-step p { font-size: 14px; color: #8fa485; text-align: center; margin-bottom: 30px; line-height: 1.6; }
+.ob-row { display: flex; gap: 16px; margin-bottom: 16px; }
+.ob-input-group { flex: 1; }
+.ob-input-group label { display: block; font-size: 12px; color: #8fa485; margin-bottom: 8px; }
+.ob-input-group input, .ob-input-group select { width: 100%; padding: 14px; border-radius: 12px; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.06); color: #fff; font-size: 15px; outline: none; transition: all 0.3s; }
+.ob-input-group input:focus, .ob-input-group select:focus { border-color: var(--green-1); box-shadow: 0 0 0 3px rgba(168,224,99,0.15); }
+.ob-options { display: flex; flex-direction: column; gap: 12px; }
+.ob-option { cursor: pointer; position: relative; }
+.ob-option input { position: absolute; opacity: 0; cursor: pointer; }
+.ob-box { display: flex; align-items: center; padding: 16px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); border-radius: 12px; color: #c8e0b8; font-size: 15px; font-weight: 600; transition: all 0.25s; user-select: none; }
+.ob-option input:checked + .ob-box { background: rgba(168,224,99,0.1); border-color: rgba(168,224,99,0.5); color: var(--green-1); box-shadow: 0 4px 15px rgba(86,171,47,0.15); transform: translateX(4px); }
+.ob-custom-injury { margin-top: 6px; }
+.ob-custom-injury input { width: 100%; padding: 14px; border-radius: 12px; background: rgba(0,0,0,0.2); border: 1px dashed rgba(255,255,255,0.1); color: #fff; font-size: 14px; outline: none; transition: all 0.3s; }
+.ob-custom-injury input:focus { border-color: var(--green-1); }
+.ob-actions { display: flex; justify-content: space-between; align-items: center; margin-top: 40px; }
+.ob-btn-prev { background: transparent; border: none; color: #8fa485; font-size: 14px; cursor: pointer; padding: 10px; transition: color 0.2s; }
+.ob-btn-prev:hover { color: #fff; }
+.ob-btn-next { padding: 14px 32px; border-radius: 30px; border: none; background: linear-gradient(135deg, var(--green-1), var(--green-2)); color: #0e140e; font-size: 15px; font-weight: 800; cursor: pointer; box-shadow: 0 6px 20px rgba(86,171,47,0.3); transition: all 0.3s; margin-left: auto; }
+.ob-btn-next:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(86,171,47,0.5); }
+.ob-btn-finish { background: linear-gradient(135deg, #fff, #dff5d0); color: #0e140e; }
+
+/* Toast & Loading */
+.toast { position:fixed; bottom:28px; left:50%; transform: translateX(-50%) translateY(80px); background: linear-gradient(135deg, var(--green-1), var(--green-2)); color:#0e140e; padding:12px 24px; border-radius:30px; font-weight:700; font-size:14px; box-shadow: 0 12px 40px rgba(86,171,47,0.5); z-index:999; opacity:0; transition: all .4s var(--ease); pointer-events:none; }
+.toast.show { opacity:1; transform: translateX(-50%) translateY(0); }
+.loading-mask { position:fixed; inset:0; z-index:200; display:none; align-items:center; justify-content:center; background: rgba(14,20,14,0.85); backdrop-filter: blur(8px); }
+.loading-mask.show { display:flex; animation: fadeIn .3s; }
+.spinner { width:44px; height:44px; border-radius:50%; border:3px solid rgba(168,224,99,0.2); border-top-color: var(--green-1); animation: spin 1s linear infinite; }
+
+@media (max-height: 750px) {
+    .onboarding-overlay { padding: 20px 0; }
+    .onboarding-card { padding: 24px 20px; max-height: 90vh; overflow-y: auto; }
+    .step-dots { margin-bottom: 16px; }
+    .onboarding-step h2 { font-size: 18px; }
+    .onboarding-step p { margin-bottom: 16px; font-size: 12px; }
+    .ob-actions { margin-top: 20px; }
+    .picker-wrapper { height: 140px; }
+    .picker-mask { height: 50px; }
+    .picker-item { height: 40px; line-height: 40px; }
+}
+@media (max-width: 899px) {
+    .app-main { grid-template-columns: 1fr; }
+    .profile-panel { position:static; }
+    .msg .body { max-width:82%; }
+    .landing h1 { font-size:38px; }
+    .landing .sub { font-size:15px; }
+}
+</style>
+</head>
+<body>
+<!-- ============ 苹果风进场动画 ============ -->
+<div class="apple-intro" id="apple-intro">
+    <div class="intro-content">
+        <div class="intro-logo">🥑</div>
+        <div class="intro-title">牛油果AI训练助手</div>
+        <div class="intro-slogan">懂训练，更懂你</div>
+        <div class="intro-loader">
+            <div class="intro-loader-bar"></div>
+        </div>
+    </div>
+</div>
+
+<!-- ============ 落地页 ============ -->
+<div class="page active" id="page-landing">
+    <div class="landing">
+        <div class="logo-mark">🥑</div>
+        <h1>你的 AI 私人健身教练</h1>
+        <p class="sub">基于你独一无二的身体数据、训练年限与伤病情况，为你量身定制真正可执行的训练方案。不用再重复输入信息，它会一直记得你。</p>
+        <div class="features">
+            <div class="feature"><div class="ico">🎯</div><h3>千人千面</h3><p>身高体重、伤病、目标全维度建模，拒绝通用模板。</p></div>
+            <div class="feature"><div class="ico">🧠</div><h3>持续记忆</h3><p>跨会话保留档案与对话，越用越懂你。</p></div>
+            <div class="feature"><div class="ico">📈</div><h3>自我精进</h3><p>你的每次反馈都会让它变得更准更懂你。</p></div>
+        </div>
+        <div class="cta-row">
+            <button class="btn-primary" onclick="showPage('auth')">开始定制 →</button>
+            <button class="btn-ghost" onclick="showPage('auth')">我有账号</button>
+        </div>
+        <div class="scroll-hint">安全 · 私密 · 离线知识库驱动</div>
+    </div>
+</div>
+
+<!-- ============ 登录/注册页 ============ -->
+<div class="page" id="page-auth">
+    <div class="auth-page">
+        <div class="auth-card">
+            <button class="back" onclick="showPage('landing')" title="返回">←</button>
+            <div class="brand"><div class="ico">🥑</div></div>
+            <h2>欢迎回来</h2>
+            <p class="hint">登录或注册以开始你的专属训练</p>
+            <div class="auth-tabs">
+                <button id="tab-login" class="active" onclick="switchTab('login')">登录</button>
+                <button id="tab-register" onclick="switchTab('register')">注册</button>
+            </div>
+            <div class="form-group"><label>用户名</label>
+                <input type="text" id="username-input" placeholder="请输入用户名" autocomplete="username">
+            </div>
+            <div class="form-group"><label>密码</label>
+                <input type="password" id="pwd-input" placeholder="至少 6 位" autocomplete="current-password">
+            </div>
+            <div class="form-err" id="login-err"></div>
+            <button class="auth-submit" id="login-btn" onclick="submitAuth()">登录</button>
+        </div>
+    </div>
+</div>
+
+<!-- ============ 主聊天页 ============ -->
+<div class="page" id="page-app">
+    <div class="app-page">
+        <header class="app-header">
+            <div class="app-brand">
+                <div class="logo">🥑</div>
+                <div>
+                    <h2>牛油果AI训练助手</h2>
+                    <p>懂训练，更懂你</p>
+                </div>
+            </div>
+            <div class="app-user">
+                <div class="avatar" id="user-avatar">U</div>
+                <span class="name" id="username-label"></span>
+                <button class="btn-logout" onclick="logout()">退出</button>
+            </div>
+        </header>
+        <div class="app-main">
+            <aside class="profile-panel">
+                <h3><span>📋 身体档案</span><span class="tip" id="save-tip">已保存</span></h3>
+                <div class="profile-row">
+                    <div class="profile-item"><label>性别</label>
+                        <select id="gender">
+                            <option value="" disabled selected>请选择</option>
+                            <option value="男">男</option>
+                            <option value="女">女</option>
+                        </select></div>
+                    <div class="profile-item"><label>年龄</label><input type="number" id="age" placeholder="年龄"></div>
+                </div>
+                <div class="profile-row">
+                    <div class="profile-item"><label>身高 (cm)</label><input type="number" id="height" placeholder="身高"></div>
+                    <div class="profile-item"><label>体重 (kg)</label><input type="number" id="weight" placeholder="体重"></div>
+                </div>
+                <div class="profile-row">
+                    <div class="profile-item"><label>训练年限</label><input type="number" id="train_year" placeholder="年限"></div>
+                    <div class="profile-item"><label>训练目标</label>
+                        <select id="goal">
+                            <option value="" disabled selected>请选择</option>
+                            <option value="增肌">增肌</option>
+                            <option value="减脂">减脂</option>
+                            <option value="弹跳提升">弹跳提升</option>
+                            <option value="体态矫正">体态矫正</option>
+                        </select></div>
+                </div>
+                <div class="profile-row" style="grid-template-columns:1fr;">
+                    <div class="profile-item"><label>伤病情况</label><input type="text" id="injury" placeholder="如：膝盖旧伤 / 腰痛"></div>
+                </div>
+            </aside>
+
+            <section class="chat-panel">
+                <div class="chat-toolbar">
+                    <div class="title"><span class="dot"></span> 与 AI 教练对话中</div>
+                    <button class="btn-clear" onclick="clearChat()">清空对话</button>
+                </div>
+                <div class="chat-box" id="chat-box"></div>
+                <div class="chat-input-area">
+                    <input type="text" id="input-text" placeholder="描述你的目标或问题，例如：帮我排一个增肌期胸日计划…">
+                    <button class="btn-send" id="send-btn" onclick="sendMsg()">发送</button>
+                </div>
+            </section>
+        </div>
+    </div>
+</div>
+
+<!-- ============ 新手引导层 ============ -->
+<div class="onboarding-overlay" id="onboarding">
+    <div class="onboarding-card">
+        <div class="step-dots">
+            <div class="dot active"></div>
+            <div class="dot"></div>
+            <div class="dot"></div>
+            <div class="dot"></div>
+        </div>
+
+        <!-- 第一步：基础数据 -->
+        <div class="onboarding-step active" data-step="1">
+            <div class="step-icon">📏</div>
+            <h2>你的基本身体数据？</h2>
+            <p>滑动滚轮进行选择，AI 将以此为基础建立档案。</p>
+            
+            <div class="ob-input-group" style="margin-bottom: 16px;">
+                <label>性别</label>
+                <div style="display: flex; gap: 10px;">
+                    <button class="ob-gender-btn" onclick="setGender('男')" id="btn-gender-m">男</button>
+                    <button class="ob-gender-btn" onclick="setGender('女')" id="btn-gender-f">女</button>
+                </div>
+                <input type="hidden" id="ob-gender" value="">
+            </div>
+
+            <div class="ob-row">
+                <div class="ob-input-group">
+                    <label>年龄</label>
+                    <div class="picker-wrapper">
+                        <div class="picker-highlight"></div>
+                        <div class="picker-mask picker-mask-top"></div>
+                        <div class="picker-mask picker-mask-bottom"></div>
+                        <div class="picker-scroll" id="picker-age" onscroll="handleScroll('age')"></div>
+                    </div>
+                </div>
+                <div class="ob-input-group">
+                    <label>体重 (kg)</label>
+                    <div class="picker-wrapper">
+                        <div class="picker-highlight"></div>
+                        <div class="picker-mask picker-mask-top"></div>
+                        <div class="picker-mask picker-mask-bottom"></div>
+                        <div class="picker-scroll" id="picker-weight" onscroll="handleScroll('weight')"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="ob-row" style="grid-template-columns: 1fr; margin-top: 16px;">
+                <div class="ob-input-group">
+                    <label>身高 (cm)</label>
+                    <div class="picker-wrapper">
+                        <div class="picker-highlight"></div>
+                        <div class="picker-mask picker-mask-top"></div>
+                        <div class="picker-mask picker-mask-bottom"></div>
+                        <div class="picker-scroll" id="picker-height" onscroll="handleScroll('height')"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 第二步：训练年限 -->
+        <div class="onboarding-step" data-step="2">
+            <div class="step-icon">🏋️</div>
+            <h2>你的训练经验是？</h2>
+            <p>训练年限直接决定了 AI 给你安排的训练容量和组间休息时长。</p>
+            <div class="ob-options">
+                <label class="ob-option">
+                    <input type="radio" name="ob-train" value="0" checked>
+                    <span class="ob-box">🌱 新手（0-1年）</span>
+                </label>
+                <label class="ob-option">
+                    <input type="radio" name="ob-train" value="2">
+                    <span class="ob-box">🌿 进阶（1-3年）</span>
+                </label>
+                <label class="ob-option">
+                    <input type="radio" name="ob-train" value="5">
+                    <span class="ob-box">🌳 老手（3年以上）</span>
+                </label>
+            </div>
+        </div>
+
+        <!-- 第三步：伤病 -->
+        <div class="onboarding-step" data-step="3">
+            <div class="step-icon">🩹</div>
+            <h2>是否有需要规避的伤病？</h2>
+            <p>AI 会自动为你避开高危动作，并替换为安全的替代训练。</p>
+            <div class="ob-options" style="max-height: 260px; overflow-y: auto; padding-right: 8px;">
+                <label class="ob-option">
+                    <input type="radio" name="ob-injury" value="无" checked>
+                    <span class="ob-box">✨ 无伤病，很健康</span>
+                </label>
+                <label class="ob-option">
+                    <input type="radio" name="ob-injury" value="腰椎间盘突出">
+                    <span class="ob-box">🧘 腰椎间盘突出 / 腰突</span>
+                </label>
+                <label class="ob-option">
+                    <input type="radio" name="ob-injury" value="膝关节痛">
+                    <span class="ob-box">🦵 膝关节痛 / 髌骨劳损</span>
+                </label>
+                <label class="ob-option">
+                    <input type="radio" name="ob-injury" value="肩袖损伤">
+                    <span class="ob-box">💪 肩袖损伤 / 肩峰撞击</span>
+                </label>
+                <label class="ob-option">
+                    <input type="radio" name="ob-injury" value="腰肌劳损">
+                    <span class="ob-box">🔥 腰肌劳损 / 下背痛</span>
+                </label>
+                <label class="ob-option">
+                    <input type="radio" name="ob-injury" value="脚踝扭伤">
+                    <span class="ob-box">🦶 脚踝习惯性扭伤 / 不稳</span>
+                </label>
+                <label class="ob-option">
+                    <input type="radio" name="ob-injury" value="网球肘">
+                    <span class="ob-box">🎾 网球肘 / 高尔夫球肘</span>
+                </label>
+                <label class="ob-option">
+                    <input type="radio" name="ob-injury" value="手腕TFCC损伤">
+                    <span class="ob-box">🤚 手腕 TFCC 损伤 / 手腕痛</span>
+                </label>
+                <label class="ob-option">
+                    <input type="radio" name="ob-injury" value="髋关节弹响">
+                    <span class="ob-box">🦴 髋关节弹响 / 弹响髋</span>
+                </label>
+                <label class="ob-option">
+                    <input type="radio" name="ob-injury" value="颈椎不适">
+                    <span class="ob-box">🧍 颈椎不适 / 探颈</span>
+                </label>
+                <div class="ob-custom-injury">
+                    <input type="text" id="ob-injury-custom" placeholder="其他伤病，请填写...">
+                </div>
+            </div>
+        </div>
+
+        <!-- 第四步：目标 -->
+        <div class="onboarding-step" data-step="4">
+            <div class="step-icon">🎯</div>
+            <h2>你的终极训练目标是什么？</h2>
+            <p>这将决定 AI 为你匹配的底层逻辑是增肌、燃脂还是爆发力。</p>
+            <div class="ob-options">
+                <label class="ob-option">
+                    <input type="radio" name="ob-goal" value="增肌" checked>
+                    <span class="ob-box">🥩 增肌塑形</span>
+                </label>
+                <label class="ob-option">
+                    <input type="radio" name="ob-goal" value="减脂">
+                    <span class="ob-box">🔥 减脂刷脂</span>
+                </label>
+                <label class="ob-option">
+                    <input type="radio" name="ob-goal" value="弹跳提升">
+                    <span class="ob-box">🚀 弹跳/爆发力提升</span>
+                </label>
+                <label class="ob-option">
+                    <input type="radio" name="ob-goal" value="体态矫正">
+                    <span class="ob-box">🧍 体态矫正与康复</span>
+                </label>
+            </div>
+        </div>
+
+        <div class="ob-actions">
+            <button class="ob-btn-prev" id="ob-prev" style="visibility: hidden;" onclick="prevStep()">← 上一步</button>
+            <button class="ob-btn-next" id="ob-next" onclick="nextStep()">下一步 →</button>
+        </div>
+    </div>
+</div>
+
+<div class="toast" id="toast"></div>
+<div class="loading-mask" id="loading-mask"><div class="spinner"></div></div>
+<script>
+/* ==================== 进场动画控制 ==================== */
+document.addEventListener("DOMContentLoaded", () => {
+    const intro = document.getElementById("apple-intro");
+    if (!intro) return;
+    const hideIntro = () => {
+        if (intro.classList.contains("fade-out")) return;
+        intro.classList.add("fade-out");
+        setTimeout(() => intro.remove(), 800);
+    };
+    setTimeout(hideIntro, 1800);
+    intro.addEventListener("click", hideIntro);
+});
+
+/* ==================== 全局状态 ==================== */
+let token = localStorage.getItem("token") || "";
+let userId = localStorage.getItem("user_id") || "";
+let username = localStorage.getItem("username") || "";
+let authMode = "login";
+let currentProfileCompleted = false;
+const answeredSet = new Map();
+const feedbackInflight = new Set();
+
+/* ==================== 页面切换 ==================== */
+function showPage(name) {
+    document.querySelectorAll(".page").forEach(p => p.classList.remove("active"));
+    const el = document.getElementById("page-" + name);
+    if (el) el.classList.add("active");
+    window.scrollTo(0, 0);
+}
+
+/* ==================== Toast ==================== */
+let toastTimer = null;
+function showToast(msg) {
+    const t = document.getElementById("toast");
+    t.innerText = msg;
+    t.classList.add("show");
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => t.classList.remove("show"), 2200);
+}
+function showLoading(show) {
+    document.getElementById("loading-mask").classList.toggle("show", !!show);
+}
+
+/* ==================== 启动 ==================== */
+window.addEventListener("DOMContentLoaded", async () => {
+    if (!token) { showPage("landing"); return; }
+    showLoading(true);
+    const ok = await loadProfileAndUser();
+    if (!ok) {
+        doLogoutLocal();
+        showLoading(false);
+        showPage("landing");
+        return;
+    }
+    showLoading(false);
+    showPage("app");
+    if (!currentProfileCompleted) { showOnboarding(); } 
+    else { await loadHistory(); }
+});
+
+/* ==================== 登录 / 注册 ==================== */
+function switchTab(mode) {
+    authMode = mode;
+    document.getElementById("tab-login").classList.toggle("active", mode === "login");
+    document.getElementById("tab-register").classList.toggle("active", mode === "register");
+    document.getElementById("login-btn").innerText = mode === "login" ? "登录" : "注册并登录";
+    document.getElementById("login-err").innerText = "";
+}
+
+async function submitAuth() {
+    const u = document.getElementById("username-input").value.trim();
+    const p = document.getElementById("pwd-input").value;
+    const errEl = document.getElementById("login-err");
+    errEl.innerText = "";
+    if (!u || !p) { errEl.innerText = "请填写用户名和密码"; return; }
+    if (authMode === "register" && p.length < 6) { errEl.innerText = "密码至少 6 位"; return; }
+
+    const btn = document.getElementById("login-btn");
+    btn.disabled = true;
+    btn.innerText = authMode === "login" ? "登录中…" : "注册中…";
+    try {
+        const url = authMode === "login" ? "/api/login" : "/api/register";
+        const res = await fetch(url, {
+            method: "POST",
+            headers: {"Content-Type": "application/json"},
+            body: JSON.stringify({username: u, password: p}),
+        });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) { errEl.innerText = data.detail || "操作失败"; return; }
+        token = data.token;
+        userId = data.user_id;
+        username = data.username || u;
+        currentProfileCompleted = !!data.profile_completed;
+        localStorage.setItem("token", token);
+        localStorage.setItem("user_id", userId);
+        localStorage.setItem("username", username);
+        await loadProfileAndUser();
+        showPage("app");
+        if (!currentProfileCompleted) { showOnboarding(); } 
+        else { await loadHistory(); }
+    } catch (e) {
+        errEl.innerText = "网络错误：" + e.message;
+    } finally {
+        btn.disabled = false;
+        btn.innerText = authMode === "login" ? "登录" : "注册并登录";
+    }
+}
+
+/* ==================== 退出登录 ==================== */
+function logout() {
+    if (!confirm("确认退出登录？")) return;
+    doLogoutLocal();
+    showPage("landing");
+}
+function doLogoutLocal() {
+    token = ""; userId = ""; username = "";
+    currentProfileCompleted = false;
+    answeredSet.clear();
+    localStorage.removeItem("token");
+    localStorage.removeItem("user_id");
+    localStorage.removeItem("username");
+}
+
+/* ==================== 档案读写 ==================== */
+function readProfileForm() {
+    return {
+        height: parseFloat(document.getElementById("height").value) || 0,
+        weight: parseFloat(document.getElementById("weight").value) || 0,
+        age: parseInt(document.getElementById("age").value) || 0,
+        gender: document.getElementById("gender").value,
+        train_year: parseInt(document.getElementById("train_year").value) || 0,
+        injury: document.getElementById("injury").value || "无",
+        goal: document.getElementById("goal").value,
+    };
+}
+function fillProfileForm(p) {
+    if (!p) return;
+    document.getElementById("height").value = p.height || "";
+    document.getElementById("weight").value = p.weight || "";
+    document.getElementById("age").value = p.age || "";
+    document.getElementById("gender").value = p.gender || "";
+    document.getElementById("train_year").value = p.train_year || 0;
+    document.getElementById("injury").value = p.injury || "无";
+    document.getElementById("goal").value = p.goal || "增肌";
+}
+async function loadProfileAndUser() {
+    try {
+        const res = await fetch("/api/profile", { headers: {"Authorization": "Bearer " + token} });
+        if (!res.ok) return false;
+        const data = await res.json();
+        username = data.username || username;
+        localStorage.setItem("username", username);
+        document.getElementById("username-label").innerText = username;
+        document.getElementById("user-avatar").innerText = (username || "U")[0].toUpperCase();
+        currentProfileCompleted = !!data.profile_completed;
+        fillProfileForm(data.profile);
+        return true;
+    } catch { return false; }
+}
+let profileSaveTimer = null;
+async function saveProfile() {
+    if (!token) return;
+    const tip = document.getElementById("save-tip");
+    tip.classList.add("show");
+    tip.innerText = "保存中…";
+    try {
+        const res = await fetch("/api/profile", {
+            method: "POST",
+            headers: { "Content-Type": "application/json", "Authorization": "Bearer " + token },
+            body: JSON.stringify(readProfileForm()),
+        });
+        if (!res.ok) { tip.innerText = "保存失败"; return; }
+        const data = await res.json();
+        currentProfileCompleted = !!data.profile_completed;
+        tip.innerText = "✓ 已保存";
+        setTimeout(() => tip.classList.remove("show"), 1500);
+    } catch { tip.innerText = "保存失败"; }
+}
+["height","weight","age","gender","train_year","injury","goal"].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.addEventListener("change", () => {
+        if (!token) return;
+        clearTimeout(profileSaveTimer);
+        profileSaveTimer = setTimeout(saveProfile, 600);
+    });
+});
+
+/* ==================== 历史加载 ==================== */
+async function loadHistory() {
+    const box = document.getElementById("chat-box");
+    box.innerHTML = "";
+    let msgs = [];
+    try {
+        const res = await fetch("/api/history", { headers: {"Authorization": "Bearer " + token} });
+        if (res.ok) { msgs = (await res.json()).messages || []; }
+    } catch {}
+    if (!msgs.length) { 
+        box.innerHTML = `<div class="welcome-empty"><div class="icon">🥑</div><h3>你好，我是你的 AI 教练</h3><p>告诉我你的目标，我会结合你的身体档案给出专属训练方案。</p></div>`;
+        return; 
+    }
+    const answerIds = [];
+    for (const m of msgs) {
+        if (m.role === "user") { appendUserMsg(m.content, m.created_at); } 
+        else {
+            appendAiMsg(m.content, m.answer_id, m.created_at);
+            if (m.answer_id) answerIds.push(m.answer_id);
+        }
+    }
+    if (answerIds.length) {
+        try {
+            const r2 = await fetch("/api/feedback/status", {
+                method: "POST",
+                headers: { "Content-Type": "application/json", "Authorization": "Bearer " + token },
+                body: JSON.stringify({answer_ids: answerIds}),
+            });
+            if (r2.ok) {
+                const d2 = await r2.json();
+                for (const [aid, rating] of Object.entries(d2.status || {})) {
+                    answeredSet.set(aid, rating);
+                    paintFeedback(aid, rating);
+                }
+            }
+        } catch {}
+    }
+    box.scrollTop = box.scrollHeight;
+}
+
+/* ==================== 消息渲染 ==================== */
+function appendUserMsg(text, timestamp = null) {
+    const box = document.getElementById("chat-box");
+    const div = document.createElement("div");
+    div.className = "msg user";
+    div.innerHTML = `<div class="avatar">${(username || "U")[0].toUpperCase()}</div><div class="body"><div class="bubble">${escapeHtml(text)}</div><div class="meta">${nowStr(timestamp)}</div></div>`;
+    box.appendChild(div);
+    box.scrollTop = box.scrollHeight;
+}
+function appendAiMsg(text, answerId, timestamp = null) {
+    const box = document.getElementById("chat-box");
+    const div = document.createElement("div");
+    div.className = "msg ai";
+    div.dataset.answerId = answerId || "";
+    div.innerHTML = `<div class="avatar">🥑</div><div class="body"><div class="bubble">${escapeHtml(text)}</div><div class="meta">${nowStr(timestamp)}</div>${answerId ? renderFeedbackBar(answerId) : ""}</div>`;
+    box.appendChild(div);
+    box.scrollTop = box.scrollHeight;
+    return div;
+}
+function renderFeedbackBar(answerId) {
+    return `<div class="feedback-bar" data-answer-id="${answerId}"><span class="label">对你有帮助吗？</span><button data-rate="1" onclick="onRate('${answerId}',1)">👍 有帮助</button><button data-rate="-1" onclick="onRate('${answerId}',-1)">👎 没帮助</button><span class="feedback-thanks" style="display:none;"></span></div>`;
+}
+
+/* ==================== 赞踩 ==================== */
+async function onRate(answerId, rating) {
+    if (!token || answeredSet.has(answerId) || feedbackInflight.has(answerId)) return;
+    feedbackInflight.add(answerId);
+    setFeedbackDisabled(answerId, true);
+    try {
+        const res = await fetch("/api/feedback", {
+            method: "POST",
+            headers: { "Content-Type": "application/json", "Authorization": "Bearer " + token },
+            body: JSON.stringify({answer_id: answerId, rating}),
+        });
+        const data = await res.json().catch(() => ({}));
+        if (data.already_rated) { answeredSet.set(answerId, rating); paintFeedback(answerId, rating); return; }
+        if (!res.ok) { setFeedbackDisabled(answerId, false); return; }
+        answeredSet.set(answerId, rating);
+        paintFeedback(answerId, rating);
+        showToast(rating === 1 ? "谢谢认可 🎉" : "已记录，会持续改进 🙏");
+    } catch { setFeedbackDisabled(answerId, false); }
+    finally { feedbackInflight.delete(answerId); }
+}
+function setFeedbackDisabled(answerId, disabled) {
+    const bar = document.querySelector(`.feedback-bar[data-answer-id="${answerId}"]`);
+    if (bar) bar.querySelectorAll("button").forEach(b => b.disabled = disabled);
+}
+function paintFeedback(answerId, rating) {
+    const bar = document.querySelector(`.feedback-bar[data-answer-id="${answerId}"]`);
+    if (!bar) return;
+    bar.querySelectorAll("button").forEach(b => {
+        b.disabled = true;
+        if (parseInt(b.dataset.rate) === rating) b.classList.add("active");
+    });
+    const th = bar.querySelector(".feedback-thanks");
+    if (th) { th.style.display = "inline"; th.innerText = rating === 1 ? "已采纳" : "已记录"; }
+}
+
+/* ==================== 发送消息 ==================== */
+document.getElementById("input-text").addEventListener("keydown", e => {
+    if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); sendMsg(); }
+});
+let isSending = false;
+async function sendMsg() {
+    if (isSending) return;
+    const inputEl = document.getElementById("input-text");
+    const text = inputEl.value.trim();
+    if (!text) return;
+    if (!token) { showToast("请先登录"); showPage("auth"); return; }
+    if (!currentProfileCompleted) { showToast("建议先填写身体档案，AI 才能更精准定制"); }
+
+    isSending = true;
+    document.getElementById("send-btn").disabled = true;
+    const box = document.getElementById("chat-box");
+    if (box.querySelector(".welcome-empty")) box.innerHTML = "";
+
+    const nowTs = Date.now() / 1000;
+    appendUserMsg(text, nowTs);
+    inputEl.value = "";
+
+    const aiDiv = document.createElement("div");
+    aiDiv.className = "msg ai";
+    aiDiv.innerHTML = `<div class="avatar">🥑</div><div class="body"><div class="bubble"><span class="typing-cursor"></span></div><div class="meta">${nowStr(nowTs)}</div></div>`;
+    box.appendChild(aiDiv);
+    box.scrollTop = box.scrollHeight;
+    const bubbleEl = aiDiv.querySelector(".bubble");
+
+    let fullAnswer = "";
+    let answerId = "";
+
+    try {
+        const res = await fetch("/api/chat", {
+            method: "POST",
+            headers: { "Content-Type": "application/json", "Authorization": "Bearer " + token },
+            body: JSON.stringify({ query: text, profile: readProfileForm() }),
+        });
+
+        if (res.status === 401 || res.status === 403) {
+            doLogoutLocal(); showPage("auth"); showToast("登录已过期，请重新登录"); aiDiv.remove(); return;
+        }
+        if (!res.ok) { bubbleEl.innerText = "请求失败：" + res.status; return; }
+
+        const reader = res.body.getReader();
+        const decoder = new TextDecoder("utf-8");
+        let buf = "";
+
+        const handleBlock = (block) => {
+            const lines = block.split("\n");
+            let evName = "message", dataLines = [];
+            for (const line of lines) {
+                if (line.startsWith("event: ")) evName = line.slice(7).trim();
+                else if (line.startsWith("data: ")) dataLines.push(line.slice(6));
+            }
+            const payload = dataLines.join("\n");
+            if (!payload) return;
+            if (evName === "meta") { try { answerId = JSON.parse(payload).answer_id || ""; } catch {} return; }
+            if (payload === "[DONE]") return;
+            if (payload.startsWith("[ERROR]")) { bubbleEl.innerText = fullAnswer + "\n[出错了] " + payload; return; }
+            fullAnswer += payload;
+            bubbleEl.innerText = fullAnswer;
+            box.scrollTop = box.scrollHeight;
+        };
+
+        while (true) {
+            const {done, value} = await reader.read();
+            if (done) break;
+            buf += decoder.decode(value, {stream: true});
+            const parts = buf.split("\n\n");
+            buf = parts.pop();
+            for (const p of parts) handleBlock(p);
+        }
+        if (buf.trim()) handleBlock(buf);
+    } catch (e) {
+        bubbleEl.innerText = "网络错误：" + e.message;
+    } finally {
+        isSending = false;
+        document.getElementById("send-btn").disabled = false;
+        if (answerId) {
+            aiDiv.dataset.answerId = answerId;
+            const bodyEl = aiDiv.querySelector(".body");
+            const tmp = document.createElement("div");
+            tmp.innerHTML = renderFeedbackBar(answerId);
+            bodyEl.appendChild(tmp.firstElementChild);
+            if (answeredSet.has(answerId)) paintFeedback(answerId, answeredSet.get(answerId));
+        }
+        box.scrollTop = box.scrollHeight;
+    }
+}
+
+/* ==================== 清空对话 ==================== */
+async function clearChat() {
+    if (!token || !confirm("确认清空所有对话历史？")) return;
+    try {
+        await fetch("/api/clear_history", { method: "POST", headers: {"Authorization": "Bearer " + token} });
+        loadHistory(); showToast("已清空对话");
+    } catch {}
+}
+
+/* ==================== 工具与引导逻辑 ==================== */
+function escapeHtml(s) { return String(s).replace(/[&<>"']/g, c => ({"&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;"}[c])); }
+function nowStr(timestamp) { return (timestamp ? new Date(timestamp * 1000) : new Date()).toLocaleTimeString("zh-CN", {hour:"2-digit", minute:"2-digit"}); }
+
+let currentStep = 1, totalSteps = 4, selectedGender = "";
+const pickerData = {
+    age: { min: 14, max: 90, step: 1, default: 22, suffix: ' 岁' },
+    weight: { min: 35, max: 150, step: 1, default: 65, suffix: ' kg' },
+    height: { min: 140, max: 220, step: 1, default: 175, suffix: ' cm' }
+};
+const pickerValues = { age: 22, weight: 65, height: 175 };
+
+function setGender(g) {
+    selectedGender = g;
+    document.getElementById("ob-gender").value = g;
+    document.getElementById("btn-gender-m").classList.toggle("active", g === "男");
+    document.getElementById("btn-gender-f").classList.toggle("active", g === "女");
+}
+
+function initPickers() {
+    for (const [key, data] of Object.entries(pickerData)) {
+        const scrollEl = document.getElementById(`picker-${key}`);
+        if(!scrollEl) continue;
+        
+        if (scrollEl.children.length > 0) {
+            scrollEl.scrollTop = ((data.default - data.min) / data.step) * 40;
+            updatePickerActive(scrollEl);
+            continue;
+        }
+
+        const topSpacer = document.createElement('div');
+        topSpacer.style.height = '70px';
+        scrollEl.appendChild(topSpacer);
+
+        for (let i = data.min; i <= data.max; i += data.step) {
+            const item = document.createElement('div');
+            item.className = 'picker-item'; 
+            item.dataset.val = i; 
+            item.innerText = i + data.suffix;
+            scrollEl.appendChild(item);
+        }
+        
+        const bottomSpacer = document.createElement('div');
+        bottomSpacer.style.height = '70px';
+        scrollEl.appendChild(bottomSpacer);
+
+        setTimeout(() => {
+            scrollEl.scrollTop = ((data.default - data.min) / data.step) * 40;
+            updatePickerActive(scrollEl);
+        }, 50);
+    }
+}
+
+let scrollTimer = {};
+function handleScroll(key) {
+    const scrollEl = document.getElementById(`picker-${key}`);
+    updatePickerActive(scrollEl);
+    clearTimeout(scrollTimer[key]);
+    scrollTimer[key] = setTimeout(() => {
+        const index = Math.round(scrollEl.scrollTop / 40);
+        scrollEl.scrollTo({ top: index * 40, behavior: 'smooth' });
+        pickerValues[key] = pickerData[key].min + index * pickerData[key].step;
+    }, 150);
+}
+
+function updatePickerActive(scrollEl) {
+    const items = scrollEl.querySelectorAll('.picker-item');
+    items.forEach(item => item.classList.remove('active'));
+    let closestIndex = Math.round(scrollEl.scrollTop / 40);
+    if (items[closestIndex]) items[closestIndex].classList.add('active');
+}
+
+function showOnboarding() {
+    currentStep = 1; setGender(""); updateOnboardingUI();
+    document.getElementById("onboarding").classList.add("show");
+    setTimeout(initPickers, 50); 
+}
+
+function updateOnboardingUI() {
+    document.querySelectorAll(".onboarding-step").forEach(el => el.classList.remove("active"));
+    document.querySelector(`.onboarding-step[data-step="${currentStep}"]`).classList.add("active");
+    document.querySelectorAll(".step-dots .dot").forEach((el, index) => el.classList.toggle("active", index < currentStep));
+    const btnPrev = document.getElementById("ob-prev"), btnNext = document.getElementById("ob-next");
+    btnPrev.style.visibility = currentStep === 1 ? "hidden" : "visible";
+    if (currentStep === totalSteps) {
+        btnNext.innerText = "完成并开启定制 🚀"; btnNext.classList.add("ob-btn-finish");
+    } else {
+        btnNext.innerText = "下一步 →"; btnNext.classList.remove("ob-btn-finish");
+    }
+}
+
+function prevStep() { if (currentStep > 1) { currentStep--; updateOnboardingUI(); } }
+
+async function nextStep() {
+    if (currentStep === 1) {
+        if (!selectedGender) { showToast("请选择性别"); return; }
+        pickerValues.age = pickerData.age.min + Math.round(document.getElementById("picker-age").scrollTop / 40);
+        pickerValues.weight = pickerData.weight.min + Math.round(document.getElementById("picker-weight").scrollTop / 40);
+        pickerValues.height = pickerData.height.min + Math.round(document.getElementById("picker-height").scrollTop / 40);
+    }
+    if (currentStep < totalSteps) { currentStep++; updateOnboardingUI(); } 
+    else { await finishOnboarding(); }
+}
+
+async function finishOnboarding() {
+    const btnNext = document.getElementById("ob-next");
+    btnNext.disabled = true; btnNext.innerText = "保存中...";
+
+    const injuryRadio = document.querySelector('input[name="ob-injury"]:checked');
+    const customInjury = document.getElementById("ob-injury-custom").value.trim();
+    
+    let finalInjury = injuryRadio ? injuryRadio.value : "无";
+    if (finalInjury === "无") {
+        finalInjury = "无";
+    } else if (customInjury) {
+        finalInjury = customInjury;
+    }
+
+    const profileData = {
+        gender: selectedGender, age: pickerValues.age, height: pickerValues.height, weight: pickerValues.weight,
+        train_year: parseInt(document.querySelector('input[name="ob-train"]:checked').value) || 0,
+        injury: finalInjury,
+        goal: document.querySelector('input[name="ob-goal"]:checked').value
+    };
+
+    try {
+        const res = await fetch("/api/profile", {
+            method: "POST",
+            headers: { "Content-Type": "application/json", "Authorization": "Bearer " + token },
+            body: JSON.stringify(profileData),
+        });
+        if (res.ok) {
+            fillProfileForm(profileData);
+            currentProfileCompleted = true;
+            document.getElementById("onboarding").classList.remove("show");
+            showPage("app"); 
+            await loadHistory();
+            showToast("档案已建立，开始你的专属训练吧！");
+        }
+    } catch (e) { 
+        showToast("网络异常，请重试"); 
+    } finally { 
+        btnNext.disabled = false; 
+        btnNext.innerText = "完成并开启定制 🚀"; 
+    }
+}
+
+// 当用户在自定义伤病框里打字时，自动把上面的“无”取消，防止数据冲突
+document.getElementById("ob-injury-custom").addEventListener("input", function() {
+    if (this.value.trim() !== "") {
+        const radios = document.querySelectorAll('input[name="ob-injury"]');
+        radios.forEach(r => r.checked = false);
+    }
+});
+</script>
+</body>
+</html>
