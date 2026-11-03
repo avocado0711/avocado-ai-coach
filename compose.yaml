@@ -1,0 +1,26 @@
+services:
+  coach:
+    build: .
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env
+    environment:
+      DATA_DIR: /app/data
+      CHROMA_PATH: /app/data/chroma_db
+      EMBED_MODEL_NAME: /app/models/fit-sport-emb
+      RERANK_MODEL_NAME: /app/models/bge-reranker-v2-m3
+    volumes:
+      - ./data:/app/data
+      - ./models:/app/models:ro
+    restart: unless-stopped
+    healthcheck:
+      test:
+        - CMD
+        - python
+        - -c
+        - "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/api/health', timeout=5)"
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 90s

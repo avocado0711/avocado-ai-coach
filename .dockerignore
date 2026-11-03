@@ -1,0 +1,16 @@
+.git
+.env
+data
+models
+reports
+__pycache__
+*.db
+*.log
+.pytest_cache
+.ruff_cache
+.venv
+backups
+evaluation
+reports
+scripts
+tests

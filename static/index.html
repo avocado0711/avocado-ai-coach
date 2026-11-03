@@ -128,8 +128,9 @@ body::after { width:700px; height:700px; bottom:-250px; right:-200px;
 .profile-panel .tip.show { opacity:1; }
 .profile-row { display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:16px; }
 .profile-item label { display:block; font-size:12px; color:#8fa485; margin-bottom:8px; letter-spacing:0.5px; font-weight:600; }
-.profile-item input, .profile-item select { width:100%; padding:12px 16px; border-radius:12px; background: rgba(0,0,0,0.25); border:1px solid rgba(255,255,255,0.04); color:#e8f5e0; font-size:14px; outline:none; transition: all 0.3s var(--ease); box-shadow: inset 0 2px 5px rgba(0,0,0,0.3); }
-.profile-item input:focus, .profile-item select:focus { border-color: rgba(168,224,99,0.4); background: rgba(0,0,0,0.4); box-shadow: inset 0 2px 5px rgba(0,0,0,0.3), 0 0 0 3px rgba(168,224,99,0.15); }
+.profile-item input, .profile-item select, .profile-item textarea { width:100%; padding:12px 16px; border-radius:12px; background: rgba(0,0,0,0.25); border:1px solid rgba(255,255,255,0.04); color:#e8f5e0; font-size:14px; outline:none; transition: all 0.3s var(--ease); box-shadow: inset 0 2px 5px rgba(0,0,0,0.3); }
+.profile-item input:focus, .profile-item select:focus, .profile-item textarea:focus { border-color: rgba(168,224,99,0.4); background: rgba(0,0,0,0.4); box-shadow: inset 0 2px 5px rgba(0,0,0,0.3), 0 0 0 3px rgba(168,224,99,0.15); }
+.profile-item textarea { min-height:76px; resize:vertical; line-height:1.55; }
 .profile-item select { appearance: none; -webkit-appearance: none; background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23a8e063' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e"); background-repeat: no-repeat; background-position: right 14px center; background-size: 14px; padding-right: 36px; cursor: pointer; }
 input:-webkit-autofill, input:-webkit-autofill:hover, input:-webkit-autofill:focus, input:-webkit-autofill:active { -webkit-box-shadow: 0 0 0 30px #111811 inset !important; -webkit-text-fill-color: #e8f5e0 !important; transition: background-color 5000s ease-in-out 0s; }
 
@@ -138,6 +139,10 @@ input:-webkit-autofill, input:-webkit-autofill:hover, input:-webkit-autofill:foc
 .chat-toolbar { display:flex; align-items:center; justify-content:space-between; padding:14px 22px; border-bottom:1px solid rgba(255,255,255,0.05); background: rgba(0,0,0,0.15); }
 .chat-toolbar .title { font-size:13px; color:#c8e0b8; font-weight:700; display:flex; align-items:center; gap:8px; letter-spacing:0.5px; }
 .chat-toolbar .dot { width:8px; height:8px; border-radius:50%; background: var(--green-1); box-shadow: 0 0 10px var(--green-1); animation: pulse 2s infinite; }
+.chat-safety-note {
+    padding:8px 18px; font-size:11px; line-height:1.55; color:#9eb393;
+    background:rgba(255,180,100,.06); border-bottom:1px solid rgba(255,180,100,.12);
+}
 .btn-clear { padding:6px 14px; border-radius:20px; background:transparent; color:#8fa485; border:1px solid rgba(255,255,255,0.08); cursor:pointer; font-size:12px; transition: all .25s; }
 .btn-clear:hover { color:#ff8a8a; border-color: rgba(255,138,138,0.3); background: rgba(255,138,138,0.05); }
 
@@ -164,6 +169,58 @@ input:-webkit-autofill, input:-webkit-autofill:hover, input:-webkit-autofill:foc
 .msg.user .meta { flex-direction:row-reverse; }
 
 .typing-cursor { display:inline-block; width:2px; height:1em; background: var(--green-1); margin-left:2px; vertical-align: text-bottom; animation: blink 1s infinite; box-shadow: 0 0 5px var(--green-1); }
+
+/* 结构化教练回答 */
+.msg.ai .body { max-width:min(84%, 820px); }
+.answer-structured { display:flex; flex-direction:column; gap:10px; white-space:normal; }
+.answer-summary {
+    display:flex; align-items:flex-start; gap:10px; padding:11px 13px;
+    border:1px solid rgba(168,224,99,.2); border-radius:13px;
+    background:rgba(168,224,99,.07);
+}
+.answer-summary-caution { border-color:rgba(255,190,90,.34); background:rgba(255,170,60,.08); }
+.answer-summary-danger { border-color:rgba(255,110,110,.4); background:rgba(255,80,80,.09); }
+.answer-status-icon {
+    flex:0 0 23px; width:23px; height:23px; border-radius:50%; display:grid; place-items:center;
+    color:#10200c; background:var(--green-1); font-size:13px; font-weight:900;
+}
+.answer-summary-caution .answer-status-icon { background:#ffc260; }
+.answer-summary-danger .answer-status-icon { background:#ff7777; color:#2a0909; }
+.answer-status-label { display:block; font-size:11px; font-weight:800; color:var(--green-1); margin-bottom:3px; letter-spacing:.2px; }
+.answer-summary-caution .answer-status-label { color:#ffc260; }
+.answer-summary-danger .answer-status-label { color:#ff8b8b; }
+.answer-summary-text { color:#edf7e8; font-size:14px; line-height:1.62; white-space:pre-wrap; }
+.answer-section h4, .answer-warning h4 { margin:0 0 8px; font-size:13px; color:#cfe7c0; font-weight:800; }
+.answer-actions { padding:2px 1px; }
+.answer-actions ol { list-style:none; display:flex; flex-direction:column; gap:7px; margin:0; padding:0; }
+.answer-actions li {
+    display:grid; grid-template-columns:23px minmax(0,1fr); gap:9px; align-items:start;
+    padding:8px 10px; border-radius:11px; background:rgba(255,255,255,.025);
+}
+.answer-step-marker {
+    width:21px; height:21px; border-radius:7px; display:grid; place-items:center;
+    color:#a8e063; background:rgba(168,224,99,.11); font-size:11px; font-weight:800;
+}
+.answer-step-text { font-size:13.5px; line-height:1.58; color:#dcebd5; }
+.answer-warning {
+    padding:11px 13px; border-radius:13px; border:1px solid rgba(255,115,115,.28);
+    background:rgba(255,75,75,.065);
+}
+.answer-warning h4 { color:#ff9d9d; }
+.answer-warning-text { color:#f1d7d7; font-size:13px; line-height:1.58; white-space:pre-wrap; }
+.answer-plan-table-wrap { width:100%; overflow-x:auto; border:1px solid rgba(255,255,255,.07); border-radius:11px; }
+.answer-plan-table { width:100%; min-width:580px; border-collapse:collapse; font-size:12.5px; line-height:1.5; }
+.answer-plan-table th, .answer-plan-table td { padding:8px 10px; text-align:left; vertical-align:top; border-bottom:1px solid rgba(255,255,255,.06); }
+.answer-plan-table th { color:#cce4bf; background:rgba(168,224,99,.07); font-weight:800; white-space:nowrap; }
+.answer-plan-table td { color:#d5e5cd; }
+.answer-plan-table tbody tr:last-child td { border-bottom:0; }
+.answer-reason { border-top:1px dashed rgba(255,255,255,.09); padding-top:7px; }
+.answer-reason summary { cursor:pointer; color:#8fa485; font-size:12px; user-select:none; }
+.answer-reason summary:hover { color:#b7d5a8; }
+.answer-reason .answer-text { margin-top:8px; color:#b6c9ad; font-size:12.5px; line-height:1.6; white-space:pre-wrap; }
+.answer-intro { color:#dcebd5; font-size:13.5px; line-height:1.62; white-space:pre-wrap; }
+.answer-fallback { gap:8px; }
+.answer-fallback .answer-text { font-size:14px; line-height:1.65; color:#e0f0d8; white-space:pre-wrap; }
 
 /* 点赞点踩区域 */
 .feedback-bar { display:flex; align-items:center; gap:8px; margin-top:10px; font-size:12px; color:#7e9274; flex-wrap:wrap; }
@@ -247,8 +304,91 @@ input:-webkit-autofill, input:-webkit-autofill:hover, input:-webkit-autofill:foc
     .app-main { grid-template-columns: 1fr; }
     .profile-panel { position:static; }
     .msg .body { max-width:82%; }
+    .msg.ai .body { max-width:92%; }
+    .answer-actions li { grid-template-columns:21px minmax(0,1fr); }
     .landing h1 { font-size:38px; }
     .landing .sub { font-size:15px; }
+}
+
+/* 隐私、训练闭环与反馈原因 */
+.consent-row {
+    display:flex; gap:10px; align-items:flex-start; margin:12px 0 16px;
+    color:#9eb393; font-size:12px; line-height:1.6;
+}
+.consent-row input { margin-top:3px; accent-color:var(--green-1); }
+.link-button {
+    border:none; background:none; color:var(--green-1); cursor:pointer;
+    padding:0; font:inherit; text-decoration:underline;
+}
+.privacy-modal {
+    position:fixed; inset:0; z-index:10020; display:none; align-items:center;
+    justify-content:center; padding:24px; background:rgba(0,0,0,.72);
+    backdrop-filter:blur(14px);
+}
+.privacy-modal.show { display:flex; }
+.privacy-card {
+    width:min(620px,100%); max-height:82vh; overflow:auto; border-radius:24px;
+    border:1px solid rgba(168,224,99,.25); background:#151d14; color:#dff5d0;
+    padding:28px; line-height:1.75; box-shadow:0 30px 80px rgba(0,0,0,.55);
+}
+.privacy-card h3 { margin-bottom:14px; font-size:20px; }
+.privacy-card p, .privacy-card li { color:#a9bea0; font-size:13px; }
+.privacy-card ul { padding-left:20px; margin:10px 0; }
+.coach-tools {
+    margin-top:20px; padding-top:18px; border-top:1px solid rgba(255,255,255,.07);
+}
+.coach-tools h4 { font-size:13px; color:#dff5d0; margin-bottom:10px; }
+.coach-tool-btn, .coach-action-btn {
+    width:100%; padding:10px 12px; border-radius:11px; cursor:pointer;
+    border:1px solid rgba(168,224,99,.25); background:rgba(168,224,99,.08);
+    color:#c8e0b8; font-size:12px; font-weight:700; transition:.2s;
+}
+.coach-tool-btn:hover, .coach-action-btn:hover { background:rgba(168,224,99,.16); }
+.coach-tools details { margin-top:10px; }
+.coach-tools summary {
+    cursor:pointer; color:#9eb393; font-size:12px; padding:7px 0;
+}
+.coach-form-grid { display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:8px; }
+.coach-form-grid input, .coach-form-grid select {
+    width:100%; min-width:0; padding:9px 10px; border-radius:9px;
+    border:1px solid rgba(255,255,255,.08); background:rgba(0,0,0,.25);
+    color:#e8f5e0; font-size:12px; outline:none;
+}
+.coach-form-grid .wide { grid-column:1/-1; }
+.coach-action-btn { margin-top:8px; }
+.plan-summary {
+    margin-top:10px; padding:12px; border-radius:12px; font-size:12px;
+    line-height:1.6; color:#b6cbaa; background:rgba(0,0,0,.18);
+}
+.plan-summary strong { color:var(--green-1); }
+.plan-table-wrap { margin-top:10px; overflow-x:auto; border:1px solid rgba(255,255,255,.07); border-radius:11px; }
+.plan-table { width:100%; min-width:520px; border-collapse:collapse; font-size:11.5px; line-height:1.5; }
+.plan-table th, .plan-table td { padding:7px 8px; text-align:left; vertical-align:top; border-bottom:1px solid rgba(255,255,255,.06); }
+.plan-table th { color:#cce4bf; background:rgba(168,224,99,.07); font-weight:800; white-space:nowrap; }
+.plan-table td { color:#c2d7b8; }
+.plan-table tbody tr:last-child td { border-bottom:0; }
+.plan-table .exercise-note { display:block; margin-top:2px; color:#7f9575; font-size:10.5px; }
+.privacy-actions { display:flex; gap:8px; margin-top:14px; }
+.privacy-actions button { flex:1; }
+.privacy-actions .danger { color:#ff9d9d; border-color:rgba(255,138,138,.3); }
+.dislike-panel {
+    margin-top:8px; padding:10px; border-radius:12px;
+    background:rgba(0,0,0,.22); border:1px solid rgba(255,255,255,.06);
+}
+.dislike-panel .reason-grid { display:flex; flex-wrap:wrap; gap:6px; }
+.dislike-panel .reason-grid button {
+    padding:6px 9px; border-radius:16px; border:1px solid rgba(168,224,99,.2);
+    background:rgba(168,224,99,.06); color:#b8d2aa; cursor:pointer; font-size:11px;
+}
+.dislike-panel textarea {
+    width:100%; min-height:54px; margin-top:8px; resize:vertical;
+    border-radius:10px; padding:8px 10px; border:1px solid rgba(255,255,255,.08);
+    background:rgba(0,0,0,.25); color:#e8f5e0; font:inherit; font-size:12px;
+}
+.dislike-panel > button {
+    margin-top:8px; padding:6px 12px; border-radius:16px; cursor:pointer;
+    border:1px solid rgba(168,224,99,.25); background:rgba(168,224,99,.12);
+    color:#c8e0b8; font-size:11px;
 }
 </style>
 </head>
@@ -274,13 +414,13 @@ input:-webkit-autofill, input:-webkit-autofill:hover, input:-webkit-autofill:foc
         <div class="features">
             <div class="feature"><div class="ico">🎯</div><h3>千人千面</h3><p>身高体重、伤病、目标全维度建模，拒绝通用模板。</p></div>
             <div class="feature"><div class="ico">🧠</div><h3>持续记忆</h3><p>跨会话保留档案与对话，越用越懂你。</p></div>
-            <div class="feature"><div class="ico">📈</div><h3>自我精进</h3><p>你的每次反馈都会让它变得更准更懂你。</p></div>
+            <div class="feature"><div class="ico">📈</div><h3>可执行闭环</h3><p>生成训练计划，记录完成度与疼痛，再根据复盘调整负荷。</p></div>
         </div>
         <div class="cta-row">
             <button class="btn-primary" onclick="showPage('auth')">开始定制 →</button>
             <button class="btn-ghost" onclick="showPage('auth')">我有账号</button>
         </div>
-        <div class="scroll-hint">安全 · 私密 · 离线知识库驱动</div>
+        <div class="scroll-hint">本地知识库检索 · 来源可追溯 · 数据可删除</div>
     </div>
 </div>
 
@@ -300,8 +440,12 @@ input:-webkit-autofill, input:-webkit-autofill:hover, input:-webkit-autofill:foc
                 <input type="text" id="username-input" placeholder="请输入用户名" autocomplete="username">
             </div>
             <div class="form-group"><label>密码</label>
-                <input type="password" id="pwd-input" placeholder="至少 6 位" autocomplete="current-password">
+                <input type="password" id="pwd-input" placeholder="至少 8 位" autocomplete="current-password">
             </div>
+            <label class="consent-row" id="consent-row" style="display:none;">
+                <input type="checkbox" id="privacy-consent">
+                <span>我同意收集账号、主动填写的身体档案、对话、训练记录和反馈，并同意将生成回答所需的当前对话、必要档案和检索片段发送给配置的模型服务。AI 不替代医疗诊断。<button type="button" class="link-button" onclick="openPrivacy()">查看说明</button></span>
+            </label>
             <div class="form-err" id="login-err"></div>
             <button class="auth-submit" id="login-btn" onclick="submitAuth()">登录</button>
         </div>
@@ -322,6 +466,7 @@ input:-webkit-autofill, input:-webkit-autofill:hover, input:-webkit-autofill:foc
             <div class="app-user">
                 <div class="avatar" id="user-avatar">U</div>
                 <span class="name" id="username-label"></span>
+                <button class="btn-logout" onclick="exportAccount()">导出数据</button>
                 <button class="btn-logout" onclick="logout()">退出</button>
             </div>
         </header>
@@ -353,7 +498,45 @@ input:-webkit-autofill, input:-webkit-autofill:hover, input:-webkit-autofill:foc
                         </select></div>
                 </div>
                 <div class="profile-row" style="grid-template-columns:1fr;">
-                    <div class="profile-item"><label>伤病情况</label><input type="text" id="injury" placeholder="如：膝盖旧伤 / 腰痛"></div>
+                    <div class="profile-item"><label>伤病情况（可填写多个）</label><textarea id="injury" maxlength="200" placeholder="多个伤病用顿号分隔，如：膝关节痛、腰肌劳损、肩袖损伤"></textarea></div>
+                </div>
+                <div class="profile-row">
+                    <div class="profile-item"><label>每周训练 (天)</label><input type="number" id="training_days" min="1" max="7" value="3"></div>
+                    <div class="profile-item"><label>单次时长 (分钟)</label><input type="number" id="session_minutes" min="15" max="180" value="60"></div>
+                </div>
+                <div class="coach-tools">
+                    <h4>执行闭环</h4>
+                    <button class="coach-tool-btn" id="generate-plan-btn" onclick="generatePlan()">生成 4 周训练计划</button>
+                    <div class="plan-summary" id="plan-summary">还没有训练计划。</div>
+                    <div class="plan-summary" id="workout-summary">尚无训练记录。</div>
+                    <details>
+                        <summary>记录一次训练</summary>
+                        <div class="coach-form-grid">
+                            <input id="log-date" type="date">
+                            <input id="log-exercise" placeholder="动作名称">
+                            <input id="log-sets" type="number" min="0" placeholder="组数">
+                            <input id="log-reps" type="number" min="0" placeholder="次数">
+                            <input id="log-weight" type="number" min="0" step="0.5" placeholder="重量 kg">
+                            <input id="log-rpe" type="number" min="1" max="10" step="0.5" placeholder="RPE 1-10">
+                            <input id="log-pain" type="number" min="0" max="10" placeholder="疼痛 0-10">
+                            <input id="log-notes" class="wide" placeholder="备注（可选）">
+                        </div>
+                        <button class="coach-action-btn" onclick="submitWorkout()">保存训练记录</button>
+                    </details>
+                    <details>
+                        <summary>本周复盘</summary>
+                        <div class="coach-form-grid">
+                            <input id="checkin-adherence" type="number" min="0" max="100" placeholder="完成率 %">
+                            <input id="checkin-energy" type="number" min="1" max="5" placeholder="精力 1-5">
+                            <input id="checkin-pain" type="number" min="0" max="10" placeholder="疼痛 0-10">
+                            <input id="checkin-notes" class="wide" placeholder="本周感受（可选）">
+                        </div>
+                        <button class="coach-action-btn" onclick="submitCheckin()">提交复盘并获取建议</button>
+                    </details>
+                    <div class="privacy-actions">
+                        <button class="coach-action-btn" onclick="openPrivacy()">隐私说明</button>
+                        <button class="coach-action-btn danger" onclick="deleteAccount()">删除账号</button>
+                    </div>
                 </div>
             </aside>
 
@@ -362,6 +545,7 @@ input:-webkit-autofill, input:-webkit-autofill:hover, input:-webkit-autofill:foc
                     <div class="title"><span class="dot"></span> 与 AI 教练对话中</div>
                     <button class="btn-clear" onclick="clearChat()">清空对话</button>
                 </div>
+                <div class="chat-safety-note">AI 不能替代医生或注册康复师。胸痛、呼吸困难、晕厥、肢体无力、大小便异常等情况请立即停止训练并寻求现场医疗帮助。</div>
                 <div class="chat-box" id="chat-box"></div>
                 <div class="chat-input-area">
                     <input type="text" id="input-text" placeholder="描述你的目标或问题，例如：帮我排一个增肌期胸日计划…">
@@ -369,6 +553,21 @@ input:-webkit-autofill, input:-webkit-autofill:hover, input:-webkit-autofill:foc
                 </div>
             </section>
         </div>
+    </div>
+</div>
+
+<!-- ============ 隐私说明 ============ -->
+<div class="privacy-modal" id="privacy-modal" onclick="closePrivacyOnBackdrop(event)">
+    <div class="privacy-card">
+        <h3>隐私与数据使用说明</h3>
+        <p id="privacy-version">版本加载中…</p>
+        <ul id="privacy-content">
+            <li>收集你主动提供的账号、身体档案、对话、训练记录和反馈。</li>
+            <li>这些数据仅用于提供训练建议、排查错误和改进内容质量。</li>
+            <li>你可以随时导出或删除自己的数据。</li>
+            <li>AI 建议不能替代医生或注册康复师，出现红旗症状请及时就医。</li>
+        </ul>
+        <button class="coach-action-btn" onclick="acceptPrivacy()">同意并继续</button>
     </div>
 </div>
 
@@ -456,46 +655,46 @@ input:-webkit-autofill, input:-webkit-autofill:hover, input:-webkit-autofill:foc
         <div class="onboarding-step" data-step="3">
             <div class="step-icon">🩹</div>
             <h2>是否有需要规避的伤病？</h2>
-            <p>AI 会自动为你避开高危动作，并替换为安全的替代训练。</p>
+            <p>可以同时选择多个伤病，AI 会综合考虑全部限制并避开高危动作。</p>
             <div class="ob-options" style="max-height: 260px; overflow-y: auto; padding-right: 8px;">
                 <label class="ob-option">
-                    <input type="radio" name="ob-injury" value="无" checked>
+                    <input type="checkbox" name="ob-injury" value="无" checked>
                     <span class="ob-box">✨ 无伤病，很健康</span>
                 </label>
                 <label class="ob-option">
-                    <input type="radio" name="ob-injury" value="腰椎间盘突出">
+                    <input type="checkbox" name="ob-injury" value="腰椎间盘突出">
                     <span class="ob-box">🧘 腰椎间盘突出 / 腰突</span>
                 </label>
                 <label class="ob-option">
-                    <input type="radio" name="ob-injury" value="膝关节痛">
+                    <input type="checkbox" name="ob-injury" value="膝关节痛">
                     <span class="ob-box">🦵 膝关节痛 / 髌骨劳损</span>
                 </label>
                 <label class="ob-option">
-                    <input type="radio" name="ob-injury" value="肩袖损伤">
+                    <input type="checkbox" name="ob-injury" value="肩袖损伤">
                     <span class="ob-box">💪 肩袖损伤 / 肩峰撞击</span>
                 </label>
                 <label class="ob-option">
-                    <input type="radio" name="ob-injury" value="腰肌劳损">
+                    <input type="checkbox" name="ob-injury" value="腰肌劳损">
                     <span class="ob-box">🔥 腰肌劳损 / 下背痛</span>
                 </label>
                 <label class="ob-option">
-                    <input type="radio" name="ob-injury" value="脚踝扭伤">
+                    <input type="checkbox" name="ob-injury" value="脚踝扭伤">
                     <span class="ob-box">🦶 脚踝习惯性扭伤 / 不稳</span>
                 </label>
                 <label class="ob-option">
-                    <input type="radio" name="ob-injury" value="网球肘">
+                    <input type="checkbox" name="ob-injury" value="网球肘">
                     <span class="ob-box">🎾 网球肘 / 高尔夫球肘</span>
                 </label>
                 <label class="ob-option">
-                    <input type="radio" name="ob-injury" value="手腕TFCC损伤">
+                    <input type="checkbox" name="ob-injury" value="手腕TFCC损伤">
                     <span class="ob-box">🤚 手腕 TFCC 损伤 / 手腕痛</span>
                 </label>
                 <label class="ob-option">
-                    <input type="radio" name="ob-injury" value="髋关节弹响">
+                    <input type="checkbox" name="ob-injury" value="髋关节弹响">
                     <span class="ob-box">🦴 髋关节弹响 / 弹响髋</span>
                 </label>
                 <label class="ob-option">
-                    <input type="radio" name="ob-injury" value="颈椎不适">
+                    <input type="checkbox" name="ob-injury" value="颈椎不适">
                     <span class="ob-box">🧍 颈椎不适 / 探颈</span>
                 </label>
                 <div class="ob-custom-injury">
@@ -538,6 +737,7 @@ input:-webkit-autofill, input:-webkit-autofill:hover, input:-webkit-autofill:foc
 
 <div class="toast" id="toast"></div>
 <div class="loading-mask" id="loading-mask"><div class="spinner"></div></div>
+<script src="/static/answer-renderer.js?v=20261103-2"></script>
 <script>
 /* ==================== 进场动画控制 ==================== */
 document.addEventListener("DOMContentLoaded", () => {
@@ -558,6 +758,8 @@ let userId = localStorage.getItem("user_id") || "";
 let username = localStorage.getItem("username") || "";
 let authMode = "login";
 let currentProfileCompleted = false;
+let currentPlan = null;
+let consentRequired = false;
 const answeredSet = new Map();
 const feedbackInflight = new Set();
 
@@ -573,10 +775,38 @@ function showPage(name) {
 let toastTimer = null;
 function showToast(msg) {
     const t = document.getElementById("toast");
-    t.innerText = msg;
+    t.innerText = String(msg);
     t.classList.add("show");
     clearTimeout(toastTimer);
     toastTimer = setTimeout(() => t.classList.remove("show"), 2200);
+}
+function apiErrorMessage(payload, fallback = "操作失败") {
+    const detail = payload && payload.detail;
+    if (typeof detail === "string" && detail.trim()) return detail;
+    if (detail && typeof detail === "object" && typeof detail.msg === "string") {
+        return detail.msg;
+    }
+    if (Array.isArray(detail)) {
+        const fieldNames = {
+            username: "用户名",
+            password: "密码",
+            privacy_consent: "隐私授权",
+        };
+        const messages = detail.map(item => {
+            if (!item || typeof item !== "object") return String(item);
+            let message = String(item.msg || fallback);
+            const atLeast = message.match(/String should have at least (\d+) character/i);
+            const atMost = message.match(/String should have at most (\d+) character/i);
+            if (atLeast) message = `至少需要 ${atLeast[1]} 个字符`;
+            else if (atMost) message = `最多允许 ${atMost[1]} 个字符`;
+            else if (/Field required/i.test(message)) message = "不能为空";
+            const location = (item.loc || []).filter(part => part !== "body");
+            const field = fieldNames[location[location.length - 1]] || location.join(".");
+            return field ? `${field}：${message}` : message;
+        });
+        if (messages.length) return messages.join("；");
+    }
+    return fallback;
 }
 function showLoading(show) {
     document.getElementById("loading-mask").classList.toggle("show", !!show);
@@ -596,7 +826,7 @@ window.addEventListener("DOMContentLoaded", async () => {
     showLoading(false);
     showPage("app");
     if (!currentProfileCompleted) { showOnboarding(); } 
-    else { await loadHistory(); }
+    else { await Promise.all([loadHistory(), loadCurrentPlan()]); }
 });
 
 /* ==================== 登录 / 注册 ==================== */
@@ -604,6 +834,7 @@ function switchTab(mode) {
     authMode = mode;
     document.getElementById("tab-login").classList.toggle("active", mode === "login");
     document.getElementById("tab-register").classList.toggle("active", mode === "register");
+    document.getElementById("consent-row").style.display = mode === "register" ? "flex" : "none";
     document.getElementById("login-btn").innerText = mode === "login" ? "登录" : "注册并登录";
     document.getElementById("login-err").innerText = "";
 }
@@ -611,10 +842,17 @@ function switchTab(mode) {
 async function submitAuth() {
     const u = document.getElementById("username-input").value.trim();
     const p = document.getElementById("pwd-input").value;
+    const privacyConsent = document.getElementById("privacy-consent").checked;
     const errEl = document.getElementById("login-err");
     errEl.innerText = "";
     if (!u || !p) { errEl.innerText = "请填写用户名和密码"; return; }
-    if (authMode === "register" && p.length < 6) { errEl.innerText = "密码至少 6 位"; return; }
+    if (authMode === "register" && (u.length < 2 || u.length > 32)) {
+        errEl.innerText = "用户名长度需为 2-32 个字符";
+        return;
+    }
+    if (authMode === "register" && p.length < 8) { errEl.innerText = "密码至少 8 位"; return; }
+    if (authMode === "register" && p.length > 64) { errEl.innerText = "密码最多 64 位"; return; }
+    if (authMode === "register" && !privacyConsent) { errEl.innerText = "注册前请同意隐私与数据使用说明"; return; }
 
     const btn = document.getElementById("login-btn");
     btn.disabled = true;
@@ -624,10 +862,10 @@ async function submitAuth() {
         const res = await fetch(url, {
             method: "POST",
             headers: {"Content-Type": "application/json"},
-            body: JSON.stringify({username: u, password: p}),
+            body: JSON.stringify({username: u, password: p, privacy_consent: privacyConsent}),
         });
         const data = await res.json().catch(() => ({}));
-        if (!res.ok) { errEl.innerText = data.detail || "操作失败"; return; }
+        if (!res.ok) { errEl.innerText = apiErrorMessage(data); return; }
         token = data.token;
         userId = data.user_id;
         username = data.username || u;
@@ -638,7 +876,7 @@ async function submitAuth() {
         await loadProfileAndUser();
         showPage("app");
         if (!currentProfileCompleted) { showOnboarding(); } 
-        else { await loadHistory(); }
+        else { await Promise.all([loadHistory(), loadCurrentPlan()]); }
     } catch (e) {
         errEl.innerText = "网络错误：" + e.message;
     } finally {
@@ -672,6 +910,8 @@ function readProfileForm() {
         train_year: parseInt(document.getElementById("train_year").value) || 0,
         injury: document.getElementById("injury").value || "无",
         goal: document.getElementById("goal").value,
+        training_days: parseInt(document.getElementById("training_days").value) || 3,
+        session_minutes: parseInt(document.getElementById("session_minutes").value) || 60,
     };
 }
 function fillProfileForm(p) {
@@ -683,6 +923,8 @@ function fillProfileForm(p) {
     document.getElementById("train_year").value = p.train_year || 0;
     document.getElementById("injury").value = p.injury || "无";
     document.getElementById("goal").value = p.goal || "增肌";
+    document.getElementById("training_days").value = p.training_days || 3;
+    document.getElementById("session_minutes").value = p.session_minutes || 60;
 }
 async function loadProfileAndUser() {
     try {
@@ -694,7 +936,9 @@ async function loadProfileAndUser() {
         document.getElementById("username-label").innerText = username;
         document.getElementById("user-avatar").innerText = (username || "U")[0].toUpperCase();
         currentProfileCompleted = !!data.profile_completed;
+        consentRequired = !data.consent || data.consent.policy_version !== data.policy_version;
         fillProfileForm(data.profile);
+        if (consentRequired) setTimeout(openPrivacy, 0);
         return true;
     } catch { return false; }
 }
@@ -717,7 +961,7 @@ async function saveProfile() {
         setTimeout(() => tip.classList.remove("show"), 1500);
     } catch { tip.innerText = "保存失败"; }
 }
-["height","weight","age","gender","train_year","injury","goal"].forEach(id => {
+["height","weight","age","gender","train_year","injury","goal","training_days","session_minutes"].forEach(id => {
     const el = document.getElementById(id);
     if (el) el.addEventListener("change", () => {
         if (!token) return;
@@ -725,6 +969,271 @@ async function saveProfile() {
         profileSaveTimer = setTimeout(saveProfile, 600);
     });
 });
+
+/* ==================== 隐私与账号数据 ==================== */
+async function openPrivacy() {
+    const modal = document.getElementById("privacy-modal");
+    modal.classList.add("show");
+    try {
+        const res = await fetch("/api/privacy");
+        if (!res.ok) return;
+        const data = await res.json();
+        document.getElementById("privacy-version").innerText = `版本：${data.version}`;
+        const items = [
+            ...(data.collected || []).map(item => `收集：${item}`),
+            `用途：${data.purpose}`,
+            data.model_processing,
+            `未评价回答最长保留 ${data.retention?.unrated_answer_days ?? 7} 天`,
+            `反馈最长保留 ${data.retention?.feedback_days ?? 365} 天`,
+            `你可以：${(data.rights || []).join("、")}`,
+            data.notice,
+        ];
+        document.getElementById("privacy-content").innerHTML = items
+            .map(item => `<li>${escapeHtml(item)}</li>`)
+            .join("");
+    } catch {}
+}
+function closePrivacy() {
+    if (consentRequired) {
+        showToast("继续使用前需要同意当前隐私说明");
+        return;
+    }
+    document.getElementById("privacy-modal").classList.remove("show");
+}
+function closePrivacyOnBackdrop(event) {
+    if (event.target.id === "privacy-modal") closePrivacy();
+}
+
+async function acceptPrivacy() {
+    if (!token) {
+        document.getElementById("privacy-modal").classList.remove("show");
+        return;
+    }
+    try {
+        const res = await fetch("/api/consent", {
+            method: "POST",
+            headers: {"Authorization": "Bearer " + token},
+        });
+        if (!res.ok) throw new Error("同意记录保存失败");
+        consentRequired = false;
+        document.getElementById("privacy-modal").classList.remove("show");
+        showToast("已记录隐私说明同意状态");
+        await Promise.all([loadHistory(), loadCurrentPlan()]);
+    } catch (error) {
+        showToast(error.message || "保存失败");
+    }
+}
+
+async function exportAccount() {
+    if (!token) return;
+    try {
+        const res = await fetch("/api/account/export", {
+            headers: {"Authorization": "Bearer " + token},
+        });
+        if (!res.ok) throw new Error("导出失败");
+        const blob = await res.blob();
+        const url = URL.createObjectURL(blob);
+        const anchor = document.createElement("a");
+        anchor.href = url;
+        anchor.download = `avocado-data-${userId || "account"}.json`;
+        anchor.click();
+        URL.revokeObjectURL(url);
+        showToast("数据已导出");
+    } catch (error) {
+        showToast(error.message || "导出失败");
+    }
+}
+
+async function deleteAccount() {
+    if (!token) return;
+    if (!confirm("这会永久删除账号、档案、对话、训练记录和反馈，且无法恢复。确定继续？")) return;
+    const password = prompt("请输入当前密码以确认删除：");
+    if (!password) return;
+    try {
+        const res = await fetch("/api/account", {
+            method: "DELETE",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": "Bearer " + token,
+            },
+            body: JSON.stringify({password}),
+        });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) throw new Error(apiErrorMessage(data, "删除失败"));
+        doLogoutLocal();
+        showPage("landing");
+        showToast("账号与相关数据已删除");
+    } catch (error) {
+        showToast(error.message || "删除失败");
+    }
+}
+
+/* ==================== 计划、训练记录与复盘 ==================== */
+function renderPlan(planRecord) {
+    const target = document.getElementById("plan-summary");
+    if (!planRecord || !planRecord.plan) {
+        currentPlan = null;
+        target.innerText = "还没有训练计划。";
+        return;
+    }
+    currentPlan = planRecord;
+    const plan = planRecord.plan || {};
+    const scheduleRows = (plan.weekly_schedule || []).map(day => {
+        const exercises = (day.exercises || []).map(item => {
+            const note = item.notes ? `<span class="exercise-note">${escapeHtml(item.notes)}</span>` : "";
+            return `<div>${escapeHtml(item.name)} · ${escapeHtml(item.sets)}×${escapeHtml(item.reps)}${note}</div>`;
+        }).join("");
+        const rests = (day.exercises || [])
+            .map(item => item.rest_seconds ? `${escapeHtml(item.rest_seconds)} 秒` : "按需")
+            .join(" / ");
+        return `<tr><td>第${escapeHtml(day.day)}天</td><td>${escapeHtml(day.focus)}</td><td>${exercises}</td><td>${rests}</td></tr>`;
+    }).join("");
+    const planTable = scheduleRows
+        ? `<div class="plan-table-wrap"><table class="plan-table"><thead><tr><th>训练日</th><th>重点</th><th>动作与组次</th><th>组间休息</th></tr></thead><tbody>${scheduleRows}</tbody></table></div>`
+        : "";
+    const adaptation = plan.adaptation || {};
+    const adaptationLines = (adaptation.changes || []).map(
+        item => `调整依据：${item}`
+    );
+    target.innerHTML = [
+        `<strong>${escapeHtml(plan.title || planRecord.title || "训练计划")}</strong>`,
+        `版本 ${escapeHtml(planRecord.version || 1)} · ${escapeHtml(planRecord.change_reason || "首次生成")}`,
+        escapeHtml(plan.summary || ""),
+        planTable,
+        ...adaptationLines.map(line => escapeHtml(line)),
+    ].filter(Boolean).join("<br>");
+}
+
+async function loadCurrentPlan() {
+    if (!token) return;
+    try {
+        const res = await fetch("/api/plans/current", {
+            headers: {"Authorization": "Bearer " + token},
+        });
+        if (!res.ok) return;
+        const data = await res.json();
+        renderPlan(data.plan);
+        await loadWorkoutSummary();
+    } catch {}
+}
+
+async function loadWorkoutSummary() {
+    if (!token) return;
+    try {
+        const res = await fetch("/api/workouts", {
+            headers: {"Authorization": "Bearer " + token},
+        });
+        if (!res.ok) return;
+        const data = await res.json();
+        const summary = data.summary || {};
+        document.getElementById("workout-summary").innerText =
+            `已记录 ${summary.logged_sets || 0} 组训练，完成 ${summary.completed_days || 0} 个训练日，最高疼痛 ${summary.max_pain || 0}/10。`;
+    } catch {}
+}
+
+async function generatePlan() {
+    if (!token) return;
+    if (!currentProfileCompleted) {
+        showToast("请先完善身体档案");
+        return;
+    }
+    const button = document.getElementById("generate-plan-btn");
+    button.disabled = true;
+    button.innerText = "正在生成…";
+    try {
+        const res = await fetch("/api/plans/generate", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": "Bearer " + token,
+            },
+            body: JSON.stringify({weeks: 4, preferences: ""}),
+        });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) throw new Error(apiErrorMessage(data, "计划生成失败"));
+        renderPlan(data);
+        showToast(data.plan?.generation_mode === "llm" ? "训练计划已生成" : "已生成安全基础计划");
+    } catch (error) {
+        showToast(error.message || "计划生成失败");
+    } finally {
+        button.disabled = false;
+        button.innerText = "重新生成 4 周计划";
+    }
+}
+
+function localToday() {
+    const now = new Date();
+    now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+    return now.toISOString().slice(0, 10);
+}
+document.getElementById("log-date").value = localToday();
+
+async function submitWorkout() {
+    const exercise = document.getElementById("log-exercise").value.trim();
+    if (!exercise) {
+        showToast("请填写训练动作");
+        return;
+    }
+    const payload = {
+        plan_id: currentPlan?.plan_id || null,
+        workout_date: document.getElementById("log-date").value || localToday(),
+        exercise,
+        sets: parseInt(document.getElementById("log-sets").value) || 0,
+        reps: parseInt(document.getElementById("log-reps").value) || 0,
+        weight_kg: parseFloat(document.getElementById("log-weight").value) || 0,
+        rpe: parseFloat(document.getElementById("log-rpe").value) || null,
+        pain: parseInt(document.getElementById("log-pain").value) || 0,
+        completed: true,
+        notes: document.getElementById("log-notes").value.trim(),
+    };
+    try {
+        const res = await fetch("/api/workouts", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": "Bearer " + token,
+            },
+            body: JSON.stringify(payload),
+        });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) throw new Error(apiErrorMessage(data, "保存失败"));
+        showToast(data.recommendation || "训练记录已保存");
+        document.getElementById("log-exercise").value = "";
+        await loadWorkoutSummary();
+    } catch (error) {
+        showToast(error.message || "保存失败");
+    }
+}
+
+async function submitCheckin() {
+    const adherence = parseInt(document.getElementById("checkin-adherence").value);
+    if (Number.isNaN(adherence)) {
+        showToast("请填写本周完成率");
+        return;
+    }
+    const payload = {
+        plan_id: currentPlan?.plan_id || null,
+        adherence,
+        energy: parseInt(document.getElementById("checkin-energy").value) || 3,
+        pain: parseInt(document.getElementById("checkin-pain").value) || 0,
+        notes: document.getElementById("checkin-notes").value.trim(),
+    };
+    try {
+        const res = await fetch("/api/checkins", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": "Bearer " + token,
+            },
+            body: JSON.stringify(payload),
+        });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) throw new Error(apiErrorMessage(data, "复盘提交失败"));
+        showToast(data.recommendation || "复盘已保存");
+    } catch (error) {
+        showToast(error.message || "复盘提交失败");
+    }
+}
 
 /* ==================== 历史加载 ==================== */
 async function loadHistory() {
@@ -771,7 +1280,7 @@ function appendUserMsg(text, timestamp = null) {
     const box = document.getElementById("chat-box");
     const div = document.createElement("div");
     div.className = "msg user";
-    div.innerHTML = `<div class="avatar">${(username || "U")[0].toUpperCase()}</div><div class="body"><div class="bubble">${escapeHtml(text)}</div><div class="meta">${nowStr(timestamp)}</div></div>`;
+    div.innerHTML = `<div class="avatar">${escapeHtml((username || "U")[0].toUpperCase())}</div><div class="body"><div class="bubble">${escapeHtml(text)}</div><div class="meta">${nowStr(timestamp)}</div></div>`;
     box.appendChild(div);
     box.scrollTop = box.scrollHeight;
 }
@@ -780,17 +1289,42 @@ function appendAiMsg(text, answerId, timestamp = null) {
     const div = document.createElement("div");
     div.className = "msg ai";
     div.dataset.answerId = answerId || "";
-    div.innerHTML = `<div class="avatar">🥑</div><div class="body"><div class="bubble">${escapeHtml(text)}</div><div class="meta">${nowStr(timestamp)}</div>${answerId ? renderFeedbackBar(answerId) : ""}</div>`;
+    div.innerHTML = `<div class="avatar">🥑</div><div class="body"><div class="bubble"></div><div class="meta">${nowStr(timestamp)}</div>${answerId ? renderFeedbackBar(answerId) : ""}</div>`;
+    renderAnswerContent(div.querySelector(".bubble"), text);
     box.appendChild(div);
     box.scrollTop = box.scrollHeight;
     return div;
 }
-function renderFeedbackBar(answerId) {
-    return `<div class="feedback-bar" data-answer-id="${answerId}"><span class="label">对你有帮助吗？</span><button data-rate="1" onclick="onRate('${answerId}',1)">👍 有帮助</button><button data-rate="-1" onclick="onRate('${answerId}',-1)">👎 没帮助</button><span class="feedback-thanks" style="display:none;"></span></div>`;
+function renderAnswerContent(container, text) {
+    if (!container) return;
+    if (window.CoachAnswerRenderer) {
+        window.CoachAnswerRenderer.renderStructuredAnswer(container, text);
+        return;
+    }
+    container.innerText = String(text || "");
 }
-
+function renderFeedbackBar(answerId) {
+    return `<div class="feedback-bar" data-answer-id="${answerId}"><span class="label">对你有帮助吗？</span><button data-rate="1" onclick="onRate('${answerId}',1)">👍 有帮助</button><button data-rate="-1" onclick="onRate('${answerId}',-1)">👎 没帮助</button><span class="feedback-thanks" style="display:none;"></span><div class="dislike-panel" style="display:none;"><div class="reason-grid"><button onclick="submitDislike('${answerId}','不准确')">不准确</button><button onclick="submitDislike('${answerId}','太笼统')">太笼统</button><button onclick="submitDislike('${answerId}','不符合伤病')">不符合伤病</button><button onclick="submitDislike('${answerId}','动作危险')">动作危险</button><button onclick="submitDislike('${answerId}','没有结合档案')">没有结合档案</button><button onclick="submitDislike('${answerId}','内容太长')">内容太长</button></div><textarea id="feedback-comment-${answerId}" maxlength="1000" placeholder="可选：补充具体问题"></textarea><button onclick="submitDislike('${answerId}','其他')">提交反馈</button></div></div>`;
+}
 /* ==================== 赞踩 ==================== */
 async function onRate(answerId, rating) {
+    if (!token || answeredSet.has(answerId) || feedbackInflight.has(answerId)) return;
+    if (rating === -1) {
+        showDislikeReasons(answerId);
+        return;
+    }
+    await sendFeedback(answerId, rating, null, null);
+}
+function showDislikeReasons(answerId) {
+    const bar = document.querySelector(`.feedback-bar[data-answer-id="${answerId}"]`);
+    const panel = bar?.querySelector(".dislike-panel");
+    if (panel) panel.style.display = "block";
+}
+async function submitDislike(answerId, reason) {
+    const comment = document.getElementById(`feedback-comment-${answerId}`)?.value || "";
+    await sendFeedback(answerId, -1, reason, comment);
+}
+async function sendFeedback(answerId, rating, reason, comment) {
     if (!token || answeredSet.has(answerId) || feedbackInflight.has(answerId)) return;
     feedbackInflight.add(answerId);
     setFeedbackDisabled(answerId, true);
@@ -798,14 +1332,14 @@ async function onRate(answerId, rating) {
         const res = await fetch("/api/feedback", {
             method: "POST",
             headers: { "Content-Type": "application/json", "Authorization": "Bearer " + token },
-            body: JSON.stringify({answer_id: answerId, rating}),
+            body: JSON.stringify({answer_id: answerId, rating, reason, comment}),
         });
         const data = await res.json().catch(() => ({}));
         if (data.already_rated) { answeredSet.set(answerId, rating); paintFeedback(answerId, rating); return; }
         if (!res.ok) { setFeedbackDisabled(answerId, false); return; }
         answeredSet.set(answerId, rating);
         paintFeedback(answerId, rating);
-        showToast(rating === 1 ? "谢谢认可 🎉" : "已记录，会持续改进 🙏");
+        showToast(rating === 1 ? "谢谢认可 🎉" : "原因已记录，将进入人工审核 🙏");
     } catch { setFeedbackDisabled(answerId, false); }
     finally { feedbackInflight.delete(answerId); }
 }
@@ -855,6 +1389,22 @@ async function sendMsg() {
 
     let fullAnswer = "";
     let answerId = "";
+    let streamFailed = false;
+    let renderTimer = null;
+    const drawAnswer = () => {
+        if (renderTimer) {
+            clearTimeout(renderTimer);
+            renderTimer = null;
+        }
+        renderAnswerContent(bubbleEl, fullAnswer);
+    };
+    const scheduleAnswerDraw = () => {
+        if (renderTimer || streamFailed) return;
+        renderTimer = setTimeout(() => {
+            renderTimer = null;
+            renderAnswerContent(bubbleEl, fullAnswer);
+        }, 60);
+    };
 
     try {
         const res = await fetch("/api/chat", {
@@ -863,10 +1413,22 @@ async function sendMsg() {
             body: JSON.stringify({ query: text, profile: readProfileForm() }),
         });
 
-        if (res.status === 401 || res.status === 403) {
+        if (res.status === 401) {
             doLogoutLocal(); showPage("auth"); showToast("登录已过期，请重新登录"); aiDiv.remove(); return;
         }
-        if (!res.ok) { bubbleEl.innerText = "请求失败：" + res.status; return; }
+        if (res.status === 403) {
+            const data = await res.json().catch(() => ({}));
+            aiDiv.remove();
+            inputEl.value = text;
+            showToast(apiErrorMessage(data, "请先同意隐私说明"));
+            openPrivacy();
+            return;
+        }
+        if (!res.ok) {
+            const data = await res.json().catch(() => ({}));
+            bubbleEl.innerText = apiErrorMessage(data, "请求失败：" + res.status);
+            return;
+        }
 
         const reader = res.body.getReader();
         const decoder = new TextDecoder("utf-8");
@@ -881,11 +1443,25 @@ async function sendMsg() {
             }
             const payload = dataLines.join("\n");
             if (!payload) return;
-            if (evName === "meta") { try { answerId = JSON.parse(payload).answer_id || ""; } catch {} return; }
+            if (evName === "meta") {
+                try {
+                    const meta = JSON.parse(payload);
+                    answerId = meta.answer_id || "";
+                } catch {}
+                return;
+            }
             if (payload === "[DONE]") return;
-            if (payload.startsWith("[ERROR]")) { bubbleEl.innerText = fullAnswer + "\n[出错了] " + payload; return; }
+            if (payload.startsWith("[ERROR]")) {
+                streamFailed = true;
+                if (renderTimer) {
+                    clearTimeout(renderTimer);
+                    renderTimer = null;
+                }
+                bubbleEl.innerText = fullAnswer + "\n[出错了] " + payload;
+                return;
+            }
             fullAnswer += payload;
-            bubbleEl.innerText = fullAnswer;
+            scheduleAnswerDraw();
             box.scrollTop = box.scrollHeight;
         };
 
@@ -898,12 +1474,17 @@ async function sendMsg() {
             for (const p of parts) handleBlock(p);
         }
         if (buf.trim()) handleBlock(buf);
+        if (!streamFailed) drawAnswer();
     } catch (e) {
+        if (renderTimer) {
+            clearTimeout(renderTimer);
+            renderTimer = null;
+        }
         bubbleEl.innerText = "网络错误：" + e.message;
     } finally {
         isSending = false;
         document.getElementById("send-btn").disabled = false;
-        if (answerId) {
+        if (answerId && !streamFailed) {
             aiDiv.dataset.answerId = answerId;
             const bodyEl = aiDiv.querySelector(".body");
             const tmp = document.createElement("div");
@@ -1032,21 +1613,27 @@ async function finishOnboarding() {
     const btnNext = document.getElementById("ob-next");
     btnNext.disabled = true; btnNext.innerText = "保存中...";
 
-    const injuryRadio = document.querySelector('input[name="ob-injury"]:checked');
+    const checkedInjuries = Array.from(document.querySelectorAll('input[name="ob-injury"]:checked'))
+        .map(input => input.value)
+        .filter(value => value !== "无");
+    const noInjurySelected = !!document.querySelector('input[name="ob-injury"][value="无"]:checked');
     const customInjury = document.getElementById("ob-injury-custom").value.trim();
-    
-    let finalInjury = injuryRadio ? injuryRadio.value : "无";
-    if (finalInjury === "无") {
-        finalInjury = "无";
-    } else if (customInjury) {
-        finalInjury = customInjury;
+    if (customInjury) checkedInjuries.push(customInjury);
+    if (!checkedInjuries.length && !noInjurySelected) {
+        showToast("请选择“无伤病”或至少一种伤病");
+        btnNext.disabled = false;
+        btnNext.innerText = "完成并开启定制 🚀";
+        return;
     }
+    const finalInjury = checkedInjuries.length ? checkedInjuries.join("、") : "无";
 
     const profileData = {
         gender: selectedGender, age: pickerValues.age, height: pickerValues.height, weight: pickerValues.weight,
         train_year: parseInt(document.querySelector('input[name="ob-train"]:checked').value) || 0,
         injury: finalInjury,
-        goal: document.querySelector('input[name="ob-goal"]:checked').value
+        goal: document.querySelector('input[name="ob-goal"]:checked').value,
+        training_days: 3,
+        session_minutes: 60
     };
 
     try {
@@ -1060,7 +1647,7 @@ async function finishOnboarding() {
             currentProfileCompleted = true;
             document.getElementById("onboarding").classList.remove("show");
             showPage("app"); 
-            await loadHistory();
+            await Promise.all([loadHistory(), loadCurrentPlan()]);
             showToast("档案已建立，开始你的专属训练吧！");
         }
     } catch (e) { 
@@ -1071,11 +1658,26 @@ async function finishOnboarding() {
     }
 }
 
-// 当用户在自定义伤病框里打字时，自动把上面的“无”取消，防止数据冲突
+// “无伤病”与其他选项互斥。
+document.querySelectorAll('input[name="ob-injury"]').forEach(input => {
+    input.addEventListener("change", function() {
+        const none = document.querySelector('input[name="ob-injury"][value="无"]');
+        if (this.value === "无" && this.checked) {
+            document.querySelectorAll('input[name="ob-injury"]').forEach(other => {
+                if (other !== this) other.checked = false;
+            });
+            document.getElementById("ob-injury-custom").value = "";
+        } else if (this.checked && none) {
+            none.checked = false;
+        }
+    });
+});
+
+// 自定义伤病不会清空已选项目，只移除“无伤病”。
 document.getElementById("ob-injury-custom").addEventListener("input", function() {
     if (this.value.trim() !== "") {
-        const radios = document.querySelectorAll('input[name="ob-injury"]');
-        radios.forEach(r => r.checked = false);
+        const none = document.querySelector('input[name="ob-injury"][value="无"]');
+        if (none) none.checked = false;
     }
 });
 </script>

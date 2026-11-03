@@ -1,0 +1,34 @@
+[
+  {
+    "source_key": "training",
+    "path": "docs/strength_training.txt",
+    "title": "力量训练内部整理稿",
+    "origin": "internal_editorial_draft",
+    "evidence_level": "editorial",
+    "review_status": "approved",
+    "reviewer": "牛油果",
+    "reviewed_at": "2026-11-01T10:43:17.288854+00:00",
+    "version": "2026-11-01",
+    "license": "internal-use-only",
+    "sha256": "05344a093447777f7150616a41198c4f06a167bf3301f717cbb89cb740425e58",
+    "review_method": "author_professional_self_review",
+    "notes": "产品内部整理稿，已增加跨动作成绩比较内容，等待项目作者以专业教练身份完成逐段审核。",
+    "review_note": ""
+  },
+  {
+    "source_key": "safety",
+    "path": "docs/safety_guidelines.md",
+    "title": "训练安全边界（内部审核稿）",
+    "origin": "internal_safety_draft",
+    "evidence_level": "editorial",
+    "review_status": "approved",
+    "reviewer": "牛油果",
+    "reviewed_at": "2026-11-01T10:43:23.097578+00:00",
+    "version": "2026-11-01",
+    "license": "internal-use-only",
+    "sha256": "b3b7f69385298b9367ee9d0bc7f2f2a8051583c9721d61a8bb4a8f84ea57147c",
+    "notes": "正式公开试点前必须由合格教练或康复专业人员审核并填写审核信息。",
+    "review_method": "author_professional_self_review",
+    "review_note": ""
+  }
+]

@@ -1,0 +1,19 @@
+{
+  "status": "needs_retrain_and_review",
+  "embedding": {
+    "logical_name": "fit-sport-emb",
+    "base_model": "BAAI/bge-small-zh-v1.5",
+    "artifact_sha256": "A6C391EE6675F1031CE82CB2B88F1AB11AE2983578A9B24BAE651B397B44EA32",
+    "declared_training_samples": 330,
+    "current_training_file": "evaluation/train_triplets.jsonl",
+    "current_training_file_sha256": "67EB127A244D6F29DE4E23893CEF335DF883AB0E23BB97ED7A0DB046BCE82356",
+    "current_training_file_rows": 419,
+    "notes": "模型卡声明训练样本为 330，而当前训练文件为 419 条，不能假定权重与当前数据一一对应。公开使用前应使用当前脚本重新训练并生成本地 training_manifest.json。"
+  },
+  "reranker": {
+    "logical_name": "bge-reranker-v2-m3",
+    "base_model": "BAAI/bge-reranker-v2-m3",
+    "artifact_sha256": "D9E3E081FAFF1EEFB84019509B2F5558FD74C1A05A2C7DB22F74174FCEDB5286",
+    "notes": "使用本地预训练权重，未进行领域微调；CPU 部署默认限制重排候选数。"
+  }
+}
